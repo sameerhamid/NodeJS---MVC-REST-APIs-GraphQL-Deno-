@@ -1,4 +1,5 @@
 const http = require("http");
+const fs = require("fs");
 
 // const rqListner = (req, res) => { };
 
@@ -33,10 +34,9 @@ const http = require("http");
 // });
 
 const server = http.createServer((req, res) => {
-  const { url } = req;
+  const { url, method } = req;
   if (url === "/") {
     res.write(`
-
         <!DOCTYPE html>
 <html lang="en">
 
@@ -48,9 +48,9 @@ const server = http.createServer((req, res) => {
 
 <body>
     <form method="POST" action="/message">
-        <div>
+    
             <input type="text" name="message" />
-        </div>
+     
         <button type="submit">Submit</button>
     </form>
 </body>
@@ -58,22 +58,29 @@ const server = http.createServer((req, res) => {
 </html>
             `);
 
-    res.end();
+    return res.end();
   }
 
-  //   res.write(`
-  //         <!DOCTYPE html>
-  // <html lang="en">
-  // <head>
-  //     <meta charset="UTF-8">
-  //     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  //     <title>Document</title>
-  // </head>
-  // <body>
-  //     <h2>Hello from my node js server</h2>
-  // </body>
-  // </html>
-  //         `);
+  if (url === "/message" && method === "POST") {
+    fs.writeFileSync("message.txt", "Dummy text");
+    res.statusCode = 302;
+    res.setHeader("Location", "/");
+    // res.writeHead(302,{})
+    return res.end();
+  }
+
+  //           <!DOCTYPE html>
+  //   <html lang="en">
+  //   <head>
+  //       <meta charset="UTF-8">
+  //       <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  //       <title>Document</title>
+  //   </head>
+  //   <body>
+  //       <h2>Hello from my node js server</h2>
+  //   </body>
+  //   </html>
+  //           `);
   //   // end stops wring
   //   res.end();
 });
