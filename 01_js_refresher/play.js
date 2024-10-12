@@ -25,5 +25,10 @@ const sumarizeUser1 = (userName, age, hasHobbies) => {
     hasHobbies
   );
 };
+
+// shorter way of writing an arrow function
+
+const add = (a, b) => a + b;
 console.log(sumarizeUser(name, age, hasHobbies));
-console.log(sumarizeUser(name, age, hasHobbies));
+console.log(sumarizeUser1(name, age, hasHobbies));
+console.log(add(10, 2));
