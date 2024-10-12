@@ -162,7 +162,7 @@ const server = http.createServer((req, res) => {
       body.push(chunck);
     });
 
-    req.on("end", () => {
+    return req.on("end", () => {
       const parsedData = Buffer.concat(body).toString();
       const message = parsedData.split("=")[1];
       fs.writeFileSync("message.txt", message);
@@ -171,11 +171,26 @@ const server = http.createServer((req, res) => {
       });
       return res.end();
     });
-
-    // redercting response code
-    // res.statusCode = 302;
-    // res.setHeader("Location", "/");
   }
+
+  res.setHeader("Content-Type", "text/html");
+  res.write(`
+          <!DOCTYPE html>
+  <html lang="en">
+
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Document</title>
+  </head>
+
+  <body>
+      <h2>Hello from node js</h2>
+  </body>
+
+  </html>
+          `);
+  res.end();
 });
 
 server.listen(3000);
