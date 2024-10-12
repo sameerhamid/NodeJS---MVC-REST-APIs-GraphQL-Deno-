@@ -165,11 +165,15 @@ const server = http.createServer((req, res) => {
     return req.on("end", () => {
       const parsedData = Buffer.concat(body).toString();
       const message = parsedData.split("=")[1];
-      fs.writeFileSync("message.txt", message);
-      res.writeHead(302, {
-        location: "/",
+      //   fs.writeFileSync("message.txt", message);
+
+      // the error callback will be executed the the write operation is completed
+      fs.writeFile("message.txt", message, (err) => {
+        res.writeHead(302, {
+          location: "/",
+        });
+        return res.end();
       });
-      return res.end();
     });
   }
 
