@@ -4,8 +4,14 @@ const http = require("http");
 
 // http.createServer(rqListner);
 
+// const server = http.createServer((req, res) => {
+//   console.log(req);
+// });
+
 const server = http.createServer((req, res) => {
-  console.log(req);
+  console.log("url>>>>>", req.url);
+  console.log("method >>>", req.method);
+  console.log("headers >>>>>", req.headers);
 });
 
 /*listen starts a process for node 
