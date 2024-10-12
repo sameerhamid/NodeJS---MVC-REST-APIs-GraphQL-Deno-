@@ -18,3 +18,8 @@ function toArray(...args) {
 }
 
 console.log(toArray(1, 2, 3, 4));
+
+// --------- array destructuring
+
+const [hobby1, hobby2] = coppiedHobbies;
+console.log(hobby1, hobby2);

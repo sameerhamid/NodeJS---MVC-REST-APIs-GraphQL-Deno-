@@ -16,10 +16,19 @@ const person = {
   },
 };
 
-const coppiedPerson = {
-  ...person,
-  hobbies: ["Cooking", "Programming"],
-};
+// const coppiedPerson = {
+//   ...person,
+//   hobbies: ["Cooking", "Programming"],
+// };
 
-console.log(person);
-console.log(coppiedPerson);
+// console.log(person);
+// console.log(coppiedPerson);
+
+//----------- object destructuring
+
+function printName({ name }) {
+  console.log(name, age);
+}
+
+const { name, age } = person;
+printName(person);
