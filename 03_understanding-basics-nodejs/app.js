@@ -166,15 +166,15 @@ const server = http.createServer((req, res) => {
       const parsedData = Buffer.concat(body).toString();
       const message = parsedData.split("=")[1];
       fs.writeFileSync("message.txt", message);
+      res.writeHead(302, {
+        location: "/",
+      });
+      return res.end();
     });
 
     // redercting response code
     // res.statusCode = 302;
     // res.setHeader("Location", "/");
-    res.writeHead(302, {
-      location: "/",
-    });
-    return res.end();
   }
 });
 
