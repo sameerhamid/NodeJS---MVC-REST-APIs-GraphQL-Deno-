@@ -16,4 +16,10 @@ const person = {
   },
 };
 
+const coppiedPerson = {
+  ...person,
+  hobbies: ["Cooking", "Programming"],
+};
+
 console.log(person);
+console.log(coppiedPerson);
