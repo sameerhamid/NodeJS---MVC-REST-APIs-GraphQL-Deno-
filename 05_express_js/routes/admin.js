@@ -3,6 +3,7 @@ const express = require("express");
 
 const router = express.Router();
 
+const rootDir = require("../utils/path");
 // ------ this route is /admin/product
 router.post("/product", (req, res, next) => {
   console.log(req.body);
@@ -33,8 +34,12 @@ router.post("/product", (req, res, next) => {
 //   next(); // allows the request to continue to the next middleware in line
 // });
 
+// router.get("/add-product", (req, res, next) => {
+//   res.sendFile(path.join(__dirname, "../", "views", "add-product.html"));
+// });
+
 router.get("/add-product", (req, res, next) => {
-  res.sendFile(path.join(__dirname, "../", "views", "add-product.html"));
+  res.sendFile(path.join(rootDir, "../", "views", "add-product.html"));
 });
 
 module.exports = router;
