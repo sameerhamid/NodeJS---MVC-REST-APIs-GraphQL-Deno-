@@ -5,18 +5,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Page not found</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+
+        }
+
+        .main-header {
+            width: 100%;
+
+            background-color: teal;
+
+        }
+
+        .main-header .nav ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            height: 56px;
+            margin-left: 50px;
+            gap: 30px;
+        }
+
+        a {
+            color: white;
+            text-decoration: none;
+        }
+
+        a:hover {
+            color: rgb(173, 166, 171);
+        }
+
+        .active {
+            color: rgb(173, 166, 171);
+            font-weight: bold;
+        }
+
+        main {
+            padding: 1rem;
+        }
+    </style>
 </head>
 
 <body>
-    <!-- <header>
-        <nav>
+    <header class="main-header">
+        <nav class="nav">
             <ul>
-                <li><a href="/">Shop</a></li>
+                <li><a href="/" class="active">Shop</a></li>
                 <li><a href="/add-product">Add Product</a></li>
 
             </ul>
         </nav>
-    </header> -->
+    </header>
 
     <main>
         <h1>My products</h1>
