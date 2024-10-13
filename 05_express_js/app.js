@@ -33,7 +33,13 @@ app.use("/add-product", (req, res, next) => {
   next(); // allows the request to continue to the next middleware in line
 });
 
-app.use("/product", (req, res, next) => {
+// app.use("/product", (req, res, next) => {
+//   console.log(req.body);
+//   res.redirect("/");
+// });
+
+// another way writing and the benifit is it will only run for get requests
+app.post("/product", (req, res, next) => {
   console.log(req.body);
   res.redirect("/");
 });
