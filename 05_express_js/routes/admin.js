@@ -2,11 +2,13 @@ const express = require("express");
 
 const router = express.Router();
 
+// ------ this route is /admin/product
 router.post("/product", (req, res, next) => {
   console.log(req.body);
   res.redirect("/");
 });
 
+// ------ this route is /admin/add-product
 router.get("/add-product", (req, res, next) => {
   res.send(`
     <!DOCTYPE html>
@@ -19,7 +21,7 @@ router.get("/add-product", (req, res, next) => {
 </head>
 
 <body>
-    <form action="/product" method="POST">
+    <form action="/admin/product" method="POST">
         <input type="text" name="title" />
         <button type="submit">Add product</button>
     </form>
