@@ -8,7 +8,8 @@ const shopRoutes = require("./routes/shop");
 
 const app = express();
 app.use(express.urlencoded({ extended: true }));
-
+// with this middleware users will access the public path
+app.use(express.static(path.join(__dirname, "public")));
 // app.use("/admin", adminRoutes);
 app.use(adminRoutes);
 app.use(shopRoutes);
