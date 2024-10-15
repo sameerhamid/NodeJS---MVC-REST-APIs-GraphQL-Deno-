@@ -5,6 +5,10 @@ const bodyParser = require("body-parser");
 
 const app = express();
 
+// we want to compile dynamic templete with the pug engine
+app.set("view engine", "pug");
+app.set("views", "views");
+
 const adminData = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
 
