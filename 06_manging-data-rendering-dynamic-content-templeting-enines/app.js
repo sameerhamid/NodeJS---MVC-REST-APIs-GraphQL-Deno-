@@ -3,19 +3,25 @@ const path = require("path");
 const express = require("express");
 const bodyParser = require("body-parser");
 const expressHb = require("express-handlebars");
+
 const app = express();
 
 // when we want to use we have to use .handlebars as we have it here
-app.engine(
-  "handlebars",
-  expressHb({
-    layoutsDir: "views/layouts/",
-    defaultLayout: "main-layout",
-    // only for layout
-    extends: "handlebars",
-  })
-);
-app.set("view engine", "handlebars");
+// app.engine(
+//   "handlebars",
+//   expressHb({
+//     layoutsDir: "views/layouts/",
+//     defaultLayout: "main-layout",
+//     // only for layout
+//     extends: "handlebars",
+//   })
+// );
+// app.set("view engine", "handlebars");
+
+// ejs templete engine
+
+app.set("view engine", "ejs");
+
 // we want to compile dynamic templete with the pug engine
 // app.set("view engine", "pug");
 app.set("views", "views");
