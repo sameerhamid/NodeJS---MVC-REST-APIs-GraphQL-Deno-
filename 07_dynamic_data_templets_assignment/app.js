@@ -1,10 +1,19 @@
 const express = require("express");
 
 const bodyParser = require("body-parser");
+const expressHbs = require("express-handlebars").create;
 
 const app = express();
+app.engine(
+  "hbs",
+  expressHbs({
+    defaultLayout: "main-layout",
+    extname: "hbs",
+  }).engine
+);
 
-app.set("view engine", "pug");
+// app.set("view engine", "pug");
+app.set("view engine", "hbs");
 app.set("views", "views");
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -14,7 +23,11 @@ app.get("/", (req, res, next) => {
 });
 
 app.get("/users", (req, res, next) => {
-  res.render("user", { pageTitle: "Users", users: users });
+  res.render("user", {
+    pageTitle: "Users",
+    users: users,
+    hasUsers: users.length > 0,
+  });
 });
 app.post("/add-user", (req, res, next) => {
   users.push({ name: req.body.username });
