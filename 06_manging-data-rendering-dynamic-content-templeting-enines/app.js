@@ -6,7 +6,15 @@ const expressHb = require("express-handlebars");
 const app = express();
 
 // when we want to use we have to use .handlebars as we have it here
-app.engine("handlebars", expressHb());
+app.engine(
+  "handlebars",
+  expressHb({
+    layoutsDir: "views/layouts/",
+    defaultLayout: "main-layout",
+    // only for layout
+    extends: "handlebars",
+  })
+);
 app.set("view engine", "handlebars");
 // we want to compile dynamic templete with the pug engine
 // app.set("view engine", "pug");
