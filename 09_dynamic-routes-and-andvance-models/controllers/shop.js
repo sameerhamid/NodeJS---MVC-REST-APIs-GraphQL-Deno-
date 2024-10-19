@@ -1,4 +1,5 @@
 const Product = require("../models/product");
+const Cart = require("../models/cart");
 
 exports.getProducts = (req, res, next) => {
   Product.fetchAll((products) => {
@@ -32,14 +33,34 @@ exports.getIndex = (req, res, next) => {
 };
 
 exports.getCart = (req, res, next) => {
-  res.render("shop/cart", {
-    path: "/cart",
-    pageTitle: "Your Cart",
+  Cart.getProducts((cartProducts) => {
+    const cart = [];
+    Product.fetchAll((products) => {
+      for (prod of products) {
+        const cartProductDAta = cartProducts.products.find(
+          (p) => p.id === prod.id
+        );
+        if (cartProductDAta) {
+          cart.push({ productData: prod, qty: cartProductDAta.qty });
+        }
+      }
+
+      console.log("cartProductDAta>>>", cart);
+      res.render("shop/cart", {
+        path: "/cart",
+        pageTitle: "Your Cart",
+        products: cart,
+      });
+    });
   });
 };
 
 exports.postCart = (req, res, next) => {
   const prodId = req.body.productId;
+
+  Product.findById(prodId, (product) => {
+    Cart.addProduct(prodId, product.price);
+  });
   res.redirect("/cart");
 };
 

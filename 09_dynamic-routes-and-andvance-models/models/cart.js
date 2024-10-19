@@ -59,4 +59,16 @@ module.exports = class Cart {
       }
     });
   }
+
+  static getProducts(cb) {
+    fs.readFile(p, (err, data) => {
+      if (err) {
+        console.log(err);
+        cb(null);
+      } else {
+        const cart = JSON.parse(data);
+        cb(cart);
+      }
+    });
+  }
 };
