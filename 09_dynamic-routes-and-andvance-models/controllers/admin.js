@@ -25,8 +25,10 @@ exports.getEditProduct = (req, res, next) => {
   }
 
   // get product details to pass prduct data
-  const prodId = req.query.productId;
+  const prodId = req.params.productId;
+
   Product.findById(prodId, (product) => {
+    console.log(product);
     if (!product) {
       return res.redirect("/");
     }
@@ -38,6 +40,8 @@ exports.getEditProduct = (req, res, next) => {
     });
   });
 };
+
+exports.postEditProduct = (req, res, next) => {};
 
 exports.getProducts = (req, res, next) => {
   Product.fetchAll((products) => {
