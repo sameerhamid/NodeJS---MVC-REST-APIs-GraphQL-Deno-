@@ -1,1 +1,8 @@
-[{"title":"abc"},{"title":"jjjj"},{"title":"jjjj"},{"title":"another"},{"title":"abc"}]
+[
+    {
+        "title": "abc",
+        "imageUrl": "https://www.tourmyindia.com/blog//wp-content/uploads/2020/11/Taj-Mahal-Agra-feature.jpg",
+        "description": "Taj mahal a beautiful place",
+        "price": "100"
+    }
+]
