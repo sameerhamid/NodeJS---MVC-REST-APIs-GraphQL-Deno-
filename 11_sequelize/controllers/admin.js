@@ -13,14 +13,21 @@ exports.postAddProduct = (req, res, next) => {
   const imageUrl = req.body.imageUrl;
   const price = req.body.price;
   const description = req.body.description;
-  const product = new Product(null, title, imageUrl, description, price);
-  product
-    .save()
-    .then(() => {
+
+  // it will create and save the object in database in one go
+
+  Product.create({
+    title,
+    price,
+    imageUrl,
+    description,
+  })
+    .then((result) => {
+      console.log("saving product>>>");
       res.redirect("/");
     })
     .catch((error) => {
-      console.log("postAddProduct error", error);
+      console.log("Error creating product>>>", error);
     });
 };
 
