@@ -5,6 +5,8 @@ const bodyParser = require("body-parser");
 
 const errorController = require("./controllers/error");
 const sequelize = require("./util/database");
+const Product = require("./models/product");
+const User = require("./models/user");
 
 const app = express();
 
@@ -22,9 +24,14 @@ app.use(shopRoutes);
 
 app.use(errorController.get404);
 
+// set relation between tables
+
+Product.belongsTo(User, { constraints: true, onDelete: "CASCADE" });
+User.hasMany(Product);
+
 // it syncs the tables if not exist then create them on the basis of models
 sequelize
-  .sync()
+  .sync({ force: true }) // this will force to already created products to add relation
   .then((result) => {
     // console.log("result>>>>", result);
     app.listen(3000);
