@@ -16,12 +16,30 @@ exports.postAddProduct = (req, res, next) => {
 
   // it will create and save the object in database in one go
 
-  Product.create({
-    title,
-    price,
-    imageUrl,
-    description,
-  })
+  // Product.create({
+  //   title,
+  //   price,
+  //   imageUrl,
+  //   description,
+  //   userId: req.user.id, // assuming user is authenticated and has id
+  // })
+  //   .then((result) => {
+  //     console.log("saving product>>>");
+  //     res.redirect("/admin/products");
+  //   })
+  //   .catch((error) => {
+  //     console.log("Error creating product>>>", error);
+  //   });
+
+  // it will automatically create the  product with an associated user id
+  // method name will always be like create and the model name
+  req.user
+    .createProduct({
+      title,
+      price,
+      imageUrl,
+      description,
+    })
     .then((result) => {
       console.log("saving product>>>");
       res.redirect("/admin/products");
@@ -65,6 +83,7 @@ exports.postEditProduct = (req, res, next) => {
       if (!product) {
         // If no product is found, you may want to create a new product
         // Create a new instance of the Product model
+
         product = Product.build({
           title: title,
           price: price,
