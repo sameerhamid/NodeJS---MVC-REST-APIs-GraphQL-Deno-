@@ -31,9 +31,20 @@ User.hasMany(Product);
 
 // it syncs the tables if not exist then create them on the basis of models
 sequelize
-  .sync({ force: true }) // this will force to already created products to add relation
+  .sync()
+  // .sync({ force: true }) // this will force to already created products to add relation
   .then((result) => {
     // console.log("result>>>>", result);
+    return User.findByPk(1);
+  })
+  .then((user) => {
+    if (!user) {
+      return User.create({ name: "test", email: "test@gmail.com" });
+    }
+    return user;
+  })
+  .then((user) => {
+    console.log("user>>>", user.dataValues);
     app.listen(3000);
   })
   .catch((error) => {
