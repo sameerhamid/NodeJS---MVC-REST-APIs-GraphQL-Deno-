@@ -24,7 +24,7 @@ exports.postAddProduct = (req, res, next) => {
   })
     .then((result) => {
       console.log("saving product>>>");
-      res.redirect("/");
+      res.redirect("/admin/products");
     })
     .catch((error) => {
       console.log("Error creating product>>>", error);
@@ -34,7 +34,7 @@ exports.postAddProduct = (req, res, next) => {
 exports.getEditProduct = (req, res, next) => {
   const editMode = req.query.edit === "true";
   if (!editMode) {
-    return res.redirect("/");
+    return res.redirect("/admin/products");
   }
 
   // get product details to pass prduct data
@@ -95,9 +95,22 @@ exports.postEditProduct = (req, res, next) => {
 exports.postDeleteProduct = (req, res, next) => {
   const { productId } = req.body;
 
-  Product.deleteById(productId);
+  Product.findByPk(productId)
+    .then((product) => {
+      if (!product) {
+        console.log("product not found");
+        return res.redirect("/admin/products");
+      }
 
-  res.redirect("/admin/products");
+      return product.destroy();
+    })
+    .then(() => {
+      return res.redirect("/admin/products");
+    })
+    .catch((error) => {
+      console.log("Error deleting product: ", error);
+      return res.redirect("/admin/products");
+    });
 };
 
 exports.getProducts = (req, res, next) => {
