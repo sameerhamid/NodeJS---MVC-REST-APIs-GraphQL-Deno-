@@ -148,9 +148,11 @@ exports.postCartDelete = (req, res, next) => {
 };
 
 exports.postOrders = (req, res, next) => {
+  let fetchedCart;
   req.user
     .getCart()
     .then((cart) => {
+      fetchedCart = cart;
       console.log("cart>>>", cart);
       return cart.getProducts();
     })
@@ -170,10 +172,14 @@ exports.postOrders = (req, res, next) => {
         });
     })
     .then((result) => {
+      // clearing the cart
+      return fetchedCart.setProducts(null);
+    })
+    .then((result) => {
       res.redirect("/orders");
     })
     .catch((err) => {
-      console.log("error while getting cart >>", err);
+      console.log("error ordering products >>", err);
     });
 };
 
