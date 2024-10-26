@@ -73,11 +73,11 @@ exports.getCart = (req, res, next) => {
     .then((cart) => {
       return cart
         .getProducts()
-        .then(() => {
+        .then((products) => {
           res.render("shop/cart", {
             path: "/cart",
             pageTitle: "Your Cart",
-            products: cart,
+            products: products,
           });
         })
         .catch((error) => {
@@ -93,11 +93,42 @@ exports.getCart = (req, res, next) => {
 
 exports.postCart = (req, res, next) => {
   const prodId = req.body.productId;
+  let fetchedCart;
+  req.user
+    .getCart()
+    .then((cart) => {
+      fetchedCart = cart;
+      return cart
+        .getProducts({ where: { id: prodId } })
+        .then((products) => {
+          let product;
+          if (products.length > 0) {
+            product = products[0];
+          }
+          let newQuantity = 1;
+          if (product) {
+          }
 
-  Product.findById(prodId, (product) => {
-    Cart.addProduct(prodId, product.price);
-  });
-  res.redirect("/cart");
+          return Product.findByPk(prodId)
+            .then((product) => {
+              fetchedCart.addProduct(product, {
+                through: { quantity: newQuantity },
+              });
+            })
+            .catch((errr) => {
+              console.log("Error finding product: ", errr);
+              return res.redirect("/");
+            });
+        })
+        .catch((err) => {});
+    })
+    .then(() => {
+      res.redirect("/cart");
+    })
+    .catch((err) => {
+      console.log("Error fetching user's cart: ", err);
+      return res.redirect("/");
+    });
 };
 
 exports.postCartDelete = (req, res, next) => {
