@@ -1,5 +1,5 @@
 const { getDb } = require("../util/database");
-
+const { ObjectId } = require("mongodb");
 class Product {
   constructor(title, price, description, imageUrl) {
     this.title = title;
@@ -33,6 +33,20 @@ class Product {
       .catch((error) => {
         console.log("Error fetching products", error);
         return [];
+      });
+  }
+
+  static findById(productId) {
+    const db = getDb();
+    return db
+      .collection("products")
+      .findOne({ _id: ObjectId.createFromHexString(productId) })
+      .then((product) => {
+        return product;
+      })
+      .catch((err) => {
+        console.log("Error finding product by ID", err);
+        return null;
       });
   }
 }

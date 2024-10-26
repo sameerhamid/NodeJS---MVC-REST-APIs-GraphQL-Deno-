@@ -1,7 +1,6 @@
 const Product = require("../models/product");
 
 exports.getAddProduct = (req, res, next) => {
-  console.log("calling>>>>");
   res.render("admin/edit-product", {
     pageTitle: "Add Product",
     path: "/admin/add-product",
@@ -124,17 +123,16 @@ exports.postAddProduct = (req, res, next) => {
 //     });
 // };
 
-// exports.getProducts = (req, res, next) => {
-//   req.user
-//     .getProducts()
-//     .then((products) => {
-//       res.render("admin/products", {
-//         prods: products,
-//         pageTitle: "Admin Products",
-//         path: "/admin/products",
-//       });
-//     })
-//     .catch((error) => {
-//       console.log("Error fetching products: ", error);
-//     });
-// };
+exports.getProducts = (req, res, next) => {
+  Product.fetchAll()
+    .then((products) => {
+      res.render("admin/products", {
+        prods: products,
+        pageTitle: "Admin Products",
+        path: "/admin/products",
+      });
+    })
+    .catch((error) => {
+      console.log("Error fetching products: ", error);
+    });
+};
