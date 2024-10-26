@@ -27,67 +27,47 @@ exports.postAddProduct = (req, res, next) => {
     });
 };
 
-// exports.getEditProduct = (req, res, next) => {
-//   const editMode = req.query.edit === "true";
-//   if (!editMode) {
-//     return res.redirect("/admin/products");
-//   }
+exports.getEditProduct = (req, res, next) => {
+  const editMode = req.query.edit === "true";
+  if (!editMode) {
+    return res.redirect("/admin/products");
+  }
 
-//   // get product details to pass prduct data
-//   const prodId = req.params.productId;
+  // get product details to pass prduct data
+  const prodId = req.params.productId;
 
-//   Product.findByPk(prodId)
-//     .then((product) => {
-//       if (!product) {
-//         return res.redirect("/admin/products");
-//       }
-//       res.render("admin/edit-product", {
-//         pageTitle: "Edit Product",
-//         path: "/admin/edit-product",
-//         editing: editMode,
-//         product,
-//       });
-//     })
-//     .catch((error) => {
-//       console.log("Error fetching product: ", error);
-//       res.redirect("/admin/products");
-//     });
-// };
+  Product.findById(prodId)
+    .then((product) => {
+      if (!product) {
+        return res.redirect("/admin/products");
+      }
+      res.render("admin/edit-product", {
+        pageTitle: "Edit Product",
+        path: "/admin/edit-product",
+        editing: editMode,
+        product,
+      });
+    })
+    .catch((error) => {
+      console.log("Error fetching product: ", error);
+      res.redirect("/admin/products");
+    });
+};
 
-// exports.postEditProduct = (req, res, next) => {
-//   const { productId, title, price, description, imageUrl } = req.body;
-//   Product.findByPk(productId)
-//     .then((product) => {
-//       if (!product) {
-//         // If no product is found, you may want to create a new product
-//         // Create a new instance of the Product model
-
-//         product = Product.build({
-//           title: title,
-//           price: price,
-//           description: description,
-//           imageUrl: imageUrl,
-//         });
-//       } else {
-//         // If product exists, update its properties
-//         product.title = title;
-//         product.price = price;
-//         product.description = description;
-//         product.imageUrl = imageUrl;
-//       }
-
-//       // Save the updated or newly created product
-//       return product.save();
-//     })
-//     .then((result) => {
-//       console.log("product updated successfully");
-//       return res.redirect("/admin/products");
-//     })
-//     .catch((error) => {
-//       console.log("Error fetching product: ", error);
-//       return res.redirect("/admin/products");
-//     });
-// };
+exports.postEditProduct = (req, res, next) => {
+  const { productId, title, price, description, imageUrl } = req.body;
+  const product = new Product(title, price, description, imageUrl, productId);
+  product
+    .save()
+    .then((product) => {
+      console.log("Product updated successfully");
+      return res.redirect("/admin/products");
+    })
+    .catch((error) => {
+      console.log("Error fetching product: ", error);
+      return res.redirect("/admin/products");
+    });
+};
 
 exports.postDeleteProduct = (req, res, next) => {
   const { productId } = req.body;

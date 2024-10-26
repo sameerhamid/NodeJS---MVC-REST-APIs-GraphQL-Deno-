@@ -1,20 +1,32 @@
 const { getDb } = require("../util/database");
 const { ObjectId } = require("mongodb");
 class Product {
-  constructor(title, price, description, imageUrl) {
+  constructor(title, price, description, imageUrl, id) {
     this.title = title;
     this.price = price;
     this.description = description;
     this.imageUrl = imageUrl;
+    this._id = id;
   }
 
   save() {
     const db = getDb();
-    return db
-      .collection("products")
-      .insertOne(this)
+    let dbOp;
+    const updateData = { ...this };
+    delete updateData._id;
+    if (this._id) {
+      dbOp = db
+        .collection("products")
+        .updateOne(
+          { _id: ObjectId.createFromHexString(this._id) },
+          { $set: updateData }
+        );
+    } else {
+      dbOp = db.collection("products").insertOne(updateData);
+    }
+    return dbOp
       .then((result) => {
-        console.log("Product saved to database", result);
+        console.log("Product saved to database");
       })
       .catch((error) => {
         console.log("Error while saving product", error);
