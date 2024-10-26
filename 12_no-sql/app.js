@@ -4,7 +4,9 @@ const express = require("express");
 const bodyParser = require("body-parser");
 
 const errorController = require("./controllers/error");
-const { client, mongoClose, mongoConnect } = require("./util/database");
+const { mongoConnect, getDb } = require("./util/database");
+const { ObjectId } = require("mongodb");
+const User = require("./models/user");
 
 const app = express();
 
@@ -20,16 +22,16 @@ app.use(express.static(path.join(__dirname, "public")));
 // adding middleware to use it anywere to retereve the user
 
 app.use((req, res, next) => {
-  // User.findByPk(1)
-  //   .then((user) => {
-  //     req.user = user;
-  //     next();
-  //   })
-  //   .catch((err) => {
-  //     console.log("Error fetching user>>>", err);
-  //     req.user = null;
-  //     next();
-  //   });
+  User.findById("671cc99b42df88a6156c14af")
+    .then((user) => {
+      req.user = user;
+      next();
+    })
+    .catch((err) => {
+      console.log("Error fetching user>>>", err);
+      req.user = null;
+      next();
+    });
   next();
 });
 

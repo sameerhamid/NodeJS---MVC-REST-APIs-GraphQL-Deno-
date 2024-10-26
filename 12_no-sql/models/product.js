@@ -6,23 +6,19 @@ class Product {
     this.price = price;
     this.description = description;
     this.imageUrl = imageUrl;
-    this._id = id;
+    this._id = id ? ObjectId.createFromHexString(id) : null;
   }
 
   save() {
     const db = getDb();
     let dbOp;
-    const updateData = { ...this };
-    delete updateData._id;
+
     if (this._id) {
       dbOp = db
         .collection("products")
-        .updateOne(
-          { _id: ObjectId.createFromHexString(this._id) },
-          { $set: updateData }
-        );
+        .updateOne({ _id: this._id }, { $set: this });
     } else {
-      dbOp = db.collection("products").insertOne(updateData);
+      dbOp = db.collection("products").insertOne(this);
     }
     return dbOp
       .then((result) => {
