@@ -1,5 +1,4 @@
 const Product = require("../models/product");
-const Cart = require("../models/cart");
 
 exports.getProducts = (req, res, next) => {
   // retrieves all products from the table
@@ -145,6 +144,36 @@ exports.postCartDelete = (req, res, next) => {
     .catch((error) => {
       console.log("Error Delete from cart : ", error);
       return res.redirect("/");
+    });
+};
+
+exports.postOrders = (req, res, next) => {
+  req.user
+    .getCart()
+    .then((cart) => {
+      console.log("cart>>>", cart);
+      return cart.getProducts();
+    })
+    .then((products) => {
+      return req.user
+        .createOrder()
+        .then((order) => {
+          return order.addProduct(
+            products.map((prod) => {
+              prod.orderItem = { quantity: prod.cartItem.quantity };
+              return prod;
+            })
+          );
+        })
+        .catch((error) => {
+          console.log("Error while ordering products>>>", error);
+        });
+    })
+    .then((result) => {
+      res.redirect("/orders");
+    })
+    .catch((err) => {
+      console.log("error while getting cart >>", err);
     });
 };
 

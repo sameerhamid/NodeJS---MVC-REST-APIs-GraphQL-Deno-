@@ -53,7 +53,7 @@ Cart.belongsToMany(Product, { through: CartItem });
 Product.belongsToMany(Cart, { through: CartItem });
 Order.belongsTo(User);
 User.hasMany(Order);
-Order.belongsToMany(Product, { throw: OrderItem });
+Order.belongsToMany(Product, { through: OrderItem });
 
 // it syncs the tables if not exist then create them on the basis of models
 sequelize
