@@ -89,39 +89,38 @@ exports.postAddProduct = (req, res, next) => {
 //     });
 // };
 
-// exports.postDeleteProduct = (req, res, next) => {
-//   const { productId } = req.body;
+exports.postDeleteProduct = (req, res, next) => {
+  const { productId } = req.body;
 
-//   // Product.findByPk(productId)
-//   //   .then((product) => {
-//   //     if (!product) {
-//   //       console.log("product not found");
-//   //       return res.redirect("/admin/products");
-//   //     }
+  Product.deleteById(productId)
+    .then((result) => {
+      console.log("Product deleted successfully");
+      return res.redirect("/admin/products");
+    })
+    .catch((error) => {
+      console.log("Error deleting product: ", error);
+      return res.redirect("/admin/products");
+    });
 
-//   //     return product.destroy();
-//   //   })
-//   //   .then(() => {
-//   //     return res.redirect("/admin/products");
-//   //   })
-//   //   .catch((error) => {
-//   //     console.log("Error deleting product: ", error);
-//   //     return res.redirect("/admin/products");
-//   //   });
+  // Product.findByPk(productId)
+  //   .then((product) => {
+  //     if (!product) {
+  //       console.log("product not found");
+  //       return res.redirect("/admin/products");
+  //     }
 
-//   // when don't have to work on some logic before deleting the product
-//   Product.destroy({
-//     where: { id: productId },
-//   })
-//     .then((result) => {
-//       console.log("product deleted successfully");
-//       res.redirect("/admin/products");
-//     })
-//     .catch((error) => {
-//       console.log("Error deleting product: ", error);
-//       res.redirect("/admin/products");
-//     });
-// };
+  //     return product.destroy();
+  //   })
+  //   .then(() => {
+  //     return res.redirect("/admin/products");
+  //   })
+  //   .catch((error) => {
+  //     console.log("Error deleting product: ", error);
+  //     return res.redirect("/admin/products");
+  //   });
+
+  // when don't have to work on some logic before deleting the product
+};
 
 exports.getProducts = (req, res, next) => {
   Product.fetchAll()

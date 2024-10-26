@@ -49,6 +49,19 @@ class Product {
         return null;
       });
   }
+
+  static deleteById(productId) {
+    const db = getDb();
+    return db
+      .collection("products")
+      .deleteOne({ _id: ObjectId.createFromHexString(productId) })
+      .then((result) => {
+        return result;
+      })
+      .catch((error) => {
+        console.log("Error deleting product", error);
+      });
+  }
 }
 
 module.exports = Product;
