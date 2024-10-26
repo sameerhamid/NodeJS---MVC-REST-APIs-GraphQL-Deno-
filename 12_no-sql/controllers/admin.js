@@ -18,8 +18,8 @@ exports.postAddProduct = (req, res, next) => {
   const product = new Product(title, price, description, imageUrl);
   product
     .save()
-    .then((result) => {
-      console.log("Save product data successfully", result);
+    .then(() => {
+      console.log("Save product data successfully");
       res.redirect("/admin/products");
     })
     .catch((error) => {

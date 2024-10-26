@@ -20,6 +20,21 @@ class Product {
         console.log("Error while saving product", error);
       });
   }
+
+  static fetchAll() {
+    const db = getDb();
+    return db
+      .collection("products")
+      .find()
+      .toArray()
+      .then((products) => {
+        return products;
+      })
+      .catch((error) => {
+        console.log("Error fetching products", error);
+        return [];
+      });
+  }
 }
 
 module.exports = Product;
