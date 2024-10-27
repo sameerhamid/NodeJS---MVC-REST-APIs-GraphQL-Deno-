@@ -63,8 +63,7 @@ exports.getCart = (req, res, next) => {
 
 exports.postCart = (req, res, next) => {
   const prodId = req.body.productId;
-  let fetchedCart;
-  let newQuantity = 1;
+
   Product.findById(prodId)
     .then((product) => {
       return req.user.addToCart(product);
@@ -81,56 +80,25 @@ exports.postCart = (req, res, next) => {
 exports.postCartDelete = (req, res, next) => {
   const prodId = req.body.productId;
   req.user
-    .getCart()
+    .deleteCartById(prodId)
     .then((cart) => {
-      return cart.getProducts({ where: { id: prodId } });
-    })
-    .then((products) => {
-      const product = products[0];
-      return product.cartItem.destroy();
-    })
-    .then(() => {
       res.redirect("/cart");
     })
     .catch((error) => {
-      console.log("Error Delete from cart : ", error);
-      return res.redirect("/");
+      console.log("Error while deleting product from cart", error);
     });
 };
 
 exports.postOrders = (req, res, next) => {
   let fetchedCart;
   req.user
-    .getCart()
+    .addOrder()
     .then((cart) => {
-      fetchedCart = cart;
-      console.log("cart>>>", cart);
-      return cart.getProducts();
-    })
-    .then((products) => {
-      return req.user
-        .createOrder()
-        .then((order) => {
-          return order.addProduct(
-            products.map((prod) => {
-              prod.orderItem = { quantity: prod.cartItem.quantity };
-              return prod;
-            })
-          );
-        })
-        .catch((error) => {
-          console.log("Error while ordering products>>>", error);
-        });
-    })
-    .then((result) => {
-      // clearing the cart
-      return fetchedCart.setProducts(null);
-    })
-    .then((result) => {
       res.redirect("/orders");
     })
-    .catch((err) => {
-      console.log("error ordering products >>", err);
+    .catch((error) => {
+      console.log("Error while adding order", error);
+      res.redirect("/cart");
     });
 };
 

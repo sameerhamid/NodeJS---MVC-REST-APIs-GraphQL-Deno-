@@ -21,7 +21,7 @@ app.use(express.static(path.join(__dirname, "public")));
 // adding middleware to use it anywere to retereve the user
 
 app.use((req, res, next) => {
-  User.findById("671cc99b42df88a6156c14af")
+  User.findById("671de86f544086be3660ca27")
     .then((user) => {
       req.user = new User(user.name, user.email, user.cart, user._id);
       next();

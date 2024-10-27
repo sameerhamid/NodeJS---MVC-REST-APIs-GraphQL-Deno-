@@ -44,6 +44,7 @@ class User {
 
   getCart() {
     const db = getDb();
+
     const productIds = this.cart.items.map((item) => item.productId);
     return db
       .collection("products")
@@ -62,6 +63,36 @@ class User {
             ).quantity,
           };
         });
+      });
+  }
+
+  deleteCartById(productId) {
+    const updatedCartItems = this.cart.items.filter(
+      (item) => item.productId.toString() !== productId.toString()
+    );
+    const db = getDb();
+    return db.collection("users").updateOne(
+      {
+        _id: this._id,
+      },
+      {
+        $set: { cart: { items: updatedCartItems } },
+      }
+    );
+  }
+
+  addOrder() {
+    const db = getDb();
+    db.collection("orders")
+      .insertOne(this.cart)
+      .then((result) => {
+        this.cart = { items: [] };
+        return db.collection("users").updateOne(
+          {
+            _id: this._id,
+          },
+          { $set: { cart: { items: [] } } }
+        );
       });
   }
 
