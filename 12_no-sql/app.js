@@ -4,8 +4,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 
 const errorController = require("./controllers/error");
-const { mongoConnect, getDb } = require("./util/database");
-const { ObjectId } = require("mongodb");
+const { mongoConnect } = require("./util/database");
 const User = require("./models/user");
 
 const app = express();
@@ -32,7 +31,6 @@ app.use((req, res, next) => {
       req.user = null;
       next();
     });
-  next();
 });
 
 app.use("/admin", adminRoutes);
