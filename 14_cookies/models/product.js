@@ -1,106 +1,102 @@
-const mongoose = require('mongoose');
-
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const productSchema = new Schema({
   title: {
     type: String,
-    required: true
+    required: true,
   },
   price: {
     type: Number,
-    required: true
+    required: true,
   },
   description: {
     type: String,
-    required: true
+    required: true,
   },
   imageUrl: {
     type: String,
-    required: true
+    required: true,
   },
   userId: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  }
+    type: mongoose.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
 });
 
-module.exports = mongoose.model('Product', productSchema);
-
-// const mongodb = require('mongodb');
-// const getDb = require('../util/database').getDb;
-
+module.exports = mongoose.model("Product", productSchema);
+// const { getDb } = require("../util/database");
+// const { ObjectId } = require("mongodb");
 // class Product {
 //   constructor(title, price, description, imageUrl, id, userId) {
 //     this.title = title;
 //     this.price = price;
 //     this.description = description;
 //     this.imageUrl = imageUrl;
-//     this._id = id ? new mongodb.ObjectId(id) : null;
+//     this._id = id ? ObjectId.createFromHexString(id) : null;
 //     this.userId = userId;
 //   }
 
 //   save() {
 //     const db = getDb();
 //     let dbOp;
+
 //     if (this._id) {
-//       // Update the product
 //       dbOp = db
-//         .collection('products')
+//         .collection("products")
 //         .updateOne({ _id: this._id }, { $set: this });
 //     } else {
-//       dbOp = db.collection('products').insertOne(this);
+//       dbOp = db.collection("products").insertOne(this);
 //     }
 //     return dbOp
-//       .then(result => {
-//         console.log(result);
+//       .then((result) => {
+//         console.log("Product saved to database");
 //       })
-//       .catch(err => {
-//         console.log(err);
+//       .catch((error) => {
+//         console.log("Error while saving product", error);
 //       });
 //   }
 
 //   static fetchAll() {
 //     const db = getDb();
 //     return db
-//       .collection('products')
+//       .collection("products")
 //       .find()
 //       .toArray()
-//       .then(products => {
-//         console.log(products);
+//       .then((products) => {
 //         return products;
 //       })
-//       .catch(err => {
-//         console.log(err);
+//       .catch((error) => {
+//         console.log("Error fetching products", error);
+//         return [];
 //       });
 //   }
 
-//   static findById(prodId) {
+//   static findById(productId) {
 //     const db = getDb();
 //     return db
-//       .collection('products')
-//       .find({ _id: new mongodb.ObjectId(prodId) })
-//       .next()
-//       .then(product => {
-//         console.log(product);
+//       .collection("products")
+//       .findOne({ _id: ObjectId.createFromHexString(productId) })
+//       .then((product) => {
 //         return product;
 //       })
-//       .catch(err => {
-//         console.log(err);
+//       .catch((err) => {
+//         console.log("Error finding product by ID", err);
+//         return null;
 //       });
 //   }
 
-//   static deleteById(prodId) {
+//   static deleteById(productId) {
 //     const db = getDb();
 //     return db
-//       .collection('products')
-//       .deleteOne({ _id: new mongodb.ObjectId(prodId) })
-//       .then(result => {
-//         console.log('Deleted');
+//       .collection("products")
+//       .deleteOne({ _id: ObjectId.createFromHexString(productId) })
+//       .then((result) => {
+//         return result;
 //       })
-//       .catch(err => {
-//         console.log(err);
+//       .catch((error) => {
+//         console.log("Error deleting product", error);
 //       });
 //   }
 // }

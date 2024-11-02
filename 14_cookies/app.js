@@ -5,6 +5,7 @@ const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 
 const errorController = require("./controllers/error");
+
 const User = require("./models/user");
 
 const app = express();
@@ -19,13 +20,19 @@ const authRoutes = require("./routes/auth");
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
 
+// adding middleware to use it anywere to retereve the user
+
 app.use((req, res, next) => {
-  User.findById("5bab316ce0a7c75f783cb8a8")
+  User.findById("6722e97b09afbe1bfae25f55")
     .then((user) => {
       req.user = user;
       next();
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      console.log("Error fetching user>>>", err);
+      req.user = null;
+      next();
+    });
 });
 
 app.use("/admin", adminRoutes);
@@ -34,33 +41,27 @@ app.use(authRoutes);
 
 app.use(errorController.get404);
 
-const mongoDbUrl =
-  "mongodb+srv://codewithsamiir:NSXtwPvAKpa1RFra@cluster0.zfjhc.mongodb.net/shop?retryWrites=true&w=majority&appName=Cluster0";
-
 mongoose
-  .connect(mongoDbUrl, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    writeConcern: {
-      w: "majority",
-      wtimeout: 5000,
-    },
-  })
+  .connect(
+    "mongodb+srv://codewithsamiir:NSXtwPvAKpa1RFra@cluster0.zfjhc.mongodb.net/shop-mongoose?retryWrites=true&w=majority&appName=Cluster0"
+  )
   .then((result) => {
+    // this method return the first object from the database
     User.findOne().then((user) => {
       if (!user) {
         const user = new User({
-          name: "test",
+          name: "Test",
           email: "test@gmail.com",
-          cart: {
-            items: [],
-          },
+          cart: { items: [] },
         });
         user.save();
       }
     });
-    app.listen(3000, () => console.log("Server is running on port 3000"));
+
+    app.listen(3000);
+    console.log("Connected to MongoDB!");
+    console.log("Server running on port 3000");
   })
-  .catch((err) => {
-    console.log("MongoDB connection error:", err);
+  .catch((error) => {
+    console.log("Error while connecting...", error);
   });
