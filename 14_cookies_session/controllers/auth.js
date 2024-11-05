@@ -18,8 +18,10 @@ exports.postLogin = (req, res, next) => {
     .then((user) => {
       req.session.user = user;
       req.session.isLoggedIn = true;
-      res.redirect("/");
-      next();
+      req.session.save((error) => {
+        console.log(error);
+        res.redirect("/");
+      });
     })
     .catch((err) => {
       console.log("Error fetching user>>>", err);
