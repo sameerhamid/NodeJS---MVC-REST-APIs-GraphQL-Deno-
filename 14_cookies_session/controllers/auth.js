@@ -1,3 +1,4 @@
+const User = require("../models/user");
 exports.getLogin = (req, res, next) => {
   // const isLoggedIn = req.get("Cookie").split("=")[1] === "true";
   console.log(req.session.isLoggedIn);
@@ -10,11 +11,19 @@ exports.getLogin = (req, res, next) => {
 
 exports.postLogin = (req, res, next) => {
   //   const { email, password } = req.body;
-  req.isLoggedIn = true;
+
   // res.setHeader("Set-Cookie", "isLoggedIn=true; HttpOnly");
 
-  req.session.isLoggedIn = true;
-  res.redirect("/");
+  User.findById("6722e97b09afbe1bfae25f55")
+    .then((user) => {
+      req.session.user = user;
+      req.session.isLoggedIn = true;
+      res.redirect("/");
+      next();
+    })
+    .catch((err) => {
+      console.log("Error fetching user>>>", err);
+    });
 };
 
 exports.postLogout = (req, res, next) => {

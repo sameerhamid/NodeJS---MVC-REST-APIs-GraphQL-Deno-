@@ -42,7 +42,11 @@ app.use(
 // adding middleware to use it anywere to retereve the user
 
 app.use((req, res, next) => {
-  User.findById("6722e97b09afbe1bfae25f55")
+  if (!req.session.user || !req.session.user._id) {
+    req.user = null;
+    return next();
+  }
+  User.findById(req.session.user._id)
     .then((user) => {
       req.user = user;
       next();
