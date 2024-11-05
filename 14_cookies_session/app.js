@@ -4,12 +4,22 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const session = require("express-session");
+const MonogoDBStore = require("connect-mongodb-session")(session);
 
 const errorController = require("./controllers/error");
 
 const User = require("./models/user");
 
+// ?retryWrites=true&w=majority&appName=Cluster0
+const MONGODB_URI =
+  "mongodb+srv://codewithsamiir:NSXtwPvAKpa1RFra@cluster0.zfjhc.mongodb.net/shop-mongoose";
 const app = express();
+
+const store = new MonogoDBStore({
+  uri: MONGODB_URI,
+  collection: "sessions",
+  // expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // 7 days
+});
 
 app.set("view engine", "ejs");
 app.set("views", "views");
@@ -21,7 +31,12 @@ const authRoutes = require("./routes/auth");
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
 app.use(
-  session({ secret: "my secret", resave: false, saveUninitialized: false })
+  session({
+    secret: "my secret",
+    resave: false,
+    saveUninitialized: false,
+    store: store,
+  })
 );
 
 // adding middleware to use it anywere to retereve the user
@@ -46,9 +61,7 @@ app.use(authRoutes);
 app.use(errorController.get404);
 
 mongoose
-  .connect(
-    "mongodb+srv://codewithsamiir:NSXtwPvAKpa1RFra@cluster0.zfjhc.mongodb.net/shop-mongoose?retryWrites=true&w=majority&appName=Cluster0"
-  )
+  .connect(MONGODB_URI)
   .then((result) => {
     // this method return the first object from the database
     User.findOne().then((user) => {
