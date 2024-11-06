@@ -5,6 +5,8 @@ const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const session = require("express-session");
 const MonogoDBStore = require("connect-mongodb-session")(session);
+// for protection cross site request forgery
+const csrf = require("csurf");
 
 const errorController = require("./controllers/error");
 
@@ -20,6 +22,8 @@ const store = new MonogoDBStore({
   collection: "sessions",
   // expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // 7 days
 });
+
+const csrfProtection = csrf();
 
 app.set("view engine", "ejs");
 app.set("views", "views");
@@ -38,6 +42,8 @@ app.use(
     store: store,
   })
 );
+
+app.use(csrfProtection);
 
 // adding middleware to use it anywere to retereve the user
 
