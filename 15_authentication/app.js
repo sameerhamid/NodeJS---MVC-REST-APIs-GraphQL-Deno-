@@ -64,6 +64,13 @@ app.use((req, res, next) => {
     });
 });
 
+// it will pass varibles to every route
+app.use((req, res, next) => {
+  res.locals.isAuthenticated = req.session.isLoggedIn ?? false;
+  res.locals.csrfToken = req.csrfToken();
+  next();
+});
+
 app.use("/admin", adminRoutes);
 app.use(shopRoutes);
 app.use(authRoutes);

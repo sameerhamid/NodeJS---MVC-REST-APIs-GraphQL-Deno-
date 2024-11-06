@@ -15,12 +15,14 @@
                                 <h2>Quantity: <%= p.quantity%>
                                 </h2>
                                 <form action="/cart-delete-item" method="post">
+                                    <input type="hidden" name="_csrf" value="<%= csrfToken%>">
                                     <button class="btn danger" type="submit">Delete</button>
                                     <input type="hidden" name="productId" value="<%= p.productId._id%>" />
                                 </form>
                             </li>
                             <%})%>
                                 <form action="/create-order" method="post">
+                                    <input type="hidden" name="_csrf" value="<%= csrfToken%>">
                                     <button class="btn" type="submit">Order Now</button>
                                 </form>
                     </ul>
