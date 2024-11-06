@@ -12,18 +12,30 @@ exports.getLogin = (req, res, next) => {
 };
 
 exports.postLogin = (req, res, next) => {
-  //   const { email, password } = req.body;
+  const { email, password } = req.body;
 
   // res.setHeader("Set-Cookie", "isLoggedIn=true; HttpOnly");
 
-  User.findById("6722e97b09afbe1bfae25f55")
+  User.findOne({ email: email })
     .then((user) => {
-      req.session.user = user;
-      req.session.isLoggedIn = true;
-      req.session.save((error) => {
-        console.log(error);
-        res.redirect("/");
-      });
+      if (!user) return res.redirect("/login");
+      bcrypt
+        .compare(password, user.password)
+        .then((doMatch) => {
+          if (doMatch) {
+            req.session.user = user;
+            req.session.isLoggedIn = true;
+            return req.session.save((error) => {
+              console.log(error);
+              res.redirect("/");
+            });
+          }
+          res.redirect("/login");
+        })
+        .catch((err) => {
+          console.log(err);
+          res.redirect("/login");
+        });
     })
     .catch((err) => {
       console.log("Error fetching user>>>", err);
