@@ -7,6 +7,7 @@ const session = require("express-session");
 const MonogoDBStore = require("connect-mongodb-session")(session);
 // for protection cross site request forgery
 const csrf = require("csurf");
+const flash = require("connect-flash");
 
 const errorController = require("./controllers/error");
 
@@ -44,6 +45,7 @@ app.use(
 );
 
 app.use(csrfProtection);
+app.use(flash());
 
 // adding middleware to use it anywere to retereve the user
 
