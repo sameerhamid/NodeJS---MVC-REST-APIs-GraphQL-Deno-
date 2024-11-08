@@ -1,5 +1,17 @@
 const bcrypt = require("bcryptjs");
 
+const nodemailer = require("nodemailer");
+
+const transporter = nodemailer.createTransport({
+  host: "smtp-relay.brevo.com", // Brevo's SMTP server
+  port: 587, // Use 587 for TLS or 465 for SSL
+  secure: false, // Set to true if using port 465
+  auth: {
+    user: "7f9226001@smtp-brevo.com", // Your Brevo SMTP username
+    pass: "cdMVOBljzDqL5mPZ", // Your Brevo SMTP password
+  },
+});
+
 const User = require("../models/user");
 exports.getLogin = (req, res, next) => {
   // const isLoggedIn = req.get("Cookie").split("=")[1] === "true";
@@ -100,9 +112,18 @@ exports.postSignup = (req, res, next) => {
         })
         .then((result) => {
           res.redirect("/login");
+          // const mailOptions = {
+          //   from: '"Sameer" <codewithsamiir@gmail.com',
+          //   to: `${email}`,
+          //   subject: "Signup successfully",
+          //   html: "<p>You successfuly singned up!</p>",
+          // };
+          // return transporter.sendMail(mailOptions);
         });
+      // .catch((err) => {
+      //   console.log("Eamil send error>>>", err);
+      // });
     })
-
     .catch((err) => {
       console.log(err);
     });
