@@ -2,13 +2,23 @@ const bcrypt = require("bcryptjs");
 
 const nodemailer = require("nodemailer");
 
+// const transporter = nodemailer.createTransport({
+//   host: "smtp-relay.brevo.com", // SMTP server as shown in your image
+//   port: 587, // Port for TLS
+//   secure: false, // false for TLS (port 587); set to true if you use port 465 for SSL
+//   auth: {
+//     user: "7f9226001@smtp-brevo.com", // Login shown in the image
+//     pass: "cdMVOBJjzDqL5mPZ", // Password shown in the image
+//   },
+// });
+
 const transporter = nodemailer.createTransport({
-  host: "smtp-relay.brevo.com", // Brevo's SMTP server
-  port: 587, // Use 587 for TLS or 465 for SSL
-  secure: false, // Set to true if using port 465
+  host: "in-v3.mailjet.com", // Mailjet SMTP host
+  port: 587, // Use 587 for TLS
+  secure: false, // Set to true for SSL
   auth: {
-    user: "7f9226001@smtp-brevo.com", // Your Brevo SMTP username
-    pass: "cdMVOBljzDqL5mPZ", // Your Brevo SMTP password
+    user: "c74b6d55045c54988bb97bc2d3f21248", // Your Mailjet API Key
+    pass: "6629bdb62182f8e7ffdd986d7ce786f2", // Your Mailjet API Secret
   },
 });
 
@@ -112,17 +122,17 @@ exports.postSignup = (req, res, next) => {
         })
         .then((result) => {
           res.redirect("/login");
-          // const mailOptions = {
-          //   from: '"Sameer" <codewithsamiir@gmail.com',
-          //   to: `${email}`,
-          //   subject: "Signup successfully",
-          //   html: "<p>You successfuly singned up!</p>",
-          // };
-          // return transporter.sendMail(mailOptions);
+          const mailOptions = {
+            from: "codewithsamiir@gmail.com",
+            to: `${email}`,
+            subject: "Signup successfully",
+            html: "<p>You successfuly singned up using Mailjet !</p>",
+          };
+          return transporter.sendMail(mailOptions);
+        })
+        .catch((err) => {
+          console.log("Eamil send error>>>", err);
         });
-      // .catch((err) => {
-      //   console.log("Eamil send error>>>", err);
-      // });
     })
     .catch((err) => {
       console.log(err);
