@@ -68,7 +68,7 @@ exports.postEditProduct = (req, res, next) => {
   const { productId, title, price, description, imageUrl } = req.body;
   Product.findById(productId)
     .then((product) => {
-      if (product.userId !== req.user._id) {
+      if (product.userId.toString() !== req.user._id.toString()) {
         return res.redirect("/");
       }
       product.title = title;
@@ -89,10 +89,13 @@ exports.postEditProduct = (req, res, next) => {
 
 exports.postDeleteProduct = (req, res, next) => {
   const { productId } = req.body;
-
-  Product.deleteOne({ id: productId, userId: req.user._id })
+  Product.deleteOne({ _id: productId, userId: req.user._id })
     .then((result) => {
-      console.log("Product deleted successfully");
+      if (result.deletedCount > 0) {
+        console.log("Product deleted successfully");
+      } else {
+        console.log("No product found to delete");
+      }
       return res.redirect("/admin/products");
     })
     .catch((error) => {
