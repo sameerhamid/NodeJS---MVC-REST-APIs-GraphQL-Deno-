@@ -2,6 +2,7 @@ const bcrypt = require("bcryptjs");
 
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
+const { validationResult } = require("express-validator");
 
 // const transporter = nodemailer.createTransport({
 //   host: "smtp-relay.brevo.com", // SMTP server as shown in your image
@@ -101,6 +102,16 @@ exports.postSignup = (req, res, next) => {
   const email = req.body.email;
   const password = req.body.password;
   const confirmPassword = req.body.confirmPassword;
+
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(422).render("auth/signup", {
+      pageTitle: "Signup",
+      path: "/signup",
+      errorMsg: errors.array()[0].msg,
+    });
+  }
 
   User.findOne({ email: email })
     .then((userDoc) => {
