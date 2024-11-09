@@ -43,7 +43,17 @@ exports.getLogin = (req, res, next) => {
 };
 
 exports.postLogin = (req, res, next) => {
-  const { email, password } = req.body;
+  const { email, password, confirmPassword } = req.body;
+
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(422).render("auth/login", {
+      pageTitle: "Login",
+      path: "/login",
+      errorMsg: errors.array()[0].msg,
+    });
+  }
 
   // res.setHeader("Set-Cookie", "isLoggedIn=true; HttpOnly");
 
@@ -95,12 +105,16 @@ exports.getSignup = (req, res, next) => {
     pageTitle: "Signup",
     path: "/signup",
     errorMsg: message,
+    oldInput: {
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
   });
 };
 
 exports.postSignup = (req, res, next) => {
-  const email = req.body.email;
-  const password = req.body.password;
+  const { email, password, confirmPassword } = req.body;
 
   const errors = validationResult(req);
 
@@ -109,6 +123,11 @@ exports.postSignup = (req, res, next) => {
       pageTitle: "Signup",
       path: "/signup",
       errorMsg: errors.array()[0].msg,
+      oldInput: {
+        email,
+        password,
+        confirmPassword,
+      },
     });
   }
 
