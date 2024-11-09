@@ -22,6 +22,12 @@ router.post(
         min: 5,
       })
       .isAlphanumeric(),
+    body("confirmPassword").custom((value, { req }) => {
+      if (value !== req.body.password) {
+        throw new Error("Passwords do not match");
+      }
+      return true;
+    }),
   ],
   authControllers.postSignup
 );
