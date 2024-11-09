@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 
 const nodemailer = require("nodemailer");
+const crypto = require("crypto");
 
 // const transporter = nodemailer.createTransport({
 //   host: "smtp-relay.brevo.com", // SMTP server as shown in your image
@@ -137,4 +138,57 @@ exports.postSignup = (req, res, next) => {
     .catch((err) => {
       console.log(err);
     });
+};
+
+exports.getReset = (req, res, next) => {
+  let message = req.flash("error");
+  if (message.length > 0) {
+    message = message[0];
+  } else {
+    message = null;
+  }
+
+  res.render("auth/reset", {
+    pageTitle: "Reset Password",
+    path: "/reset",
+    errorMsg: message,
+  });
+};
+
+exports.postReset = (req, res, next) => {
+  crypto.randomBytes(32, (err, buffer) => {
+    if (err) {
+      console.log("Error while create random bytes>>>>", err);
+      return res.redirect("/reset");
+    }
+    const token = buffer.toString("hex");
+    User.findOne({ email: req.body.email })
+      .then((user) => {
+        if (!user) {
+          req.flash("error", "No account with this email exists.");
+          return res.redirect("/reset");
+        }
+        user.resetToken = token;
+        user.resetTokenExpiration = Date.now() + 3600000;
+        return user.save();
+      })
+      .then((result) => {
+        res.redirect("/");
+        const mailOptions = {
+          from: "codewithsamiir@gmail.com",
+          to: req.body.email,
+          subject: "Password Reset",
+          html: `<p>
+          You requested a password reset
+          </p>
+          <p>Click this <a href="http://localhost:3000/reset/${token}">link</a> to set new password</p>
+          `,
+        };
+        transporter.sendMail(mailOptions);
+      })
+      .catch((err) => {
+        console.log("Error while finding user>>>", err);
+        return res.redirect("/reset");
+      });
+  });
 };
