@@ -101,7 +101,6 @@ exports.getSignup = (req, res, next) => {
 exports.postSignup = (req, res, next) => {
   const email = req.body.email;
   const password = req.body.password;
-  const confirmPassword = req.body.confirmPassword;
 
   const errors = validationResult(req);
 
@@ -113,39 +112,40 @@ exports.postSignup = (req, res, next) => {
     });
   }
 
-  User.findOne({ email: email })
-    .then((userDoc) => {
-      if (userDoc) {
-        req.flash(
-          "error",
-          "Email already  exists, please pick a different one."
-        );
-        return res.redirect("/signup");
-      }
-      return bcrypt
-        .hash(password, 12)
-        .then((hashedPass) => {
-          const user = new User({
-            email: email,
-            password: hashedPass,
-            cart: { items: [] },
-          });
-          return user.save();
-        })
-        .then((result) => {
-          res.redirect("/login");
-          const mailOptions = {
-            from: "codewithsamiir@gmail.com",
-            to: `${email}`,
-            subject: "Signup successfully",
-            html: "<p>You successfuly singned up using Mailjet !</p>",
-          };
-          return transporter.sendMail(mailOptions);
-        })
-        .catch((err) => {
-          console.log("Eamil send error>>>", err);
-        });
+  // User.findOne({ email: email })
+  //   .then((userDoc) => {
+  //     if (userDoc) {
+  //       req.flash(
+  //         "error",
+  //         "Email already  exists, please pick a different one."
+  //       );
+  //       return res.redirect("/signup");
+  //     }
+  // return
+  bcrypt
+    .hash(password, 12)
+    .then((hashedPass) => {
+      const user = new User({
+        email: email,
+        password: hashedPass,
+        cart: { items: [] },
+      });
+      return user.save();
     })
+    .then((result) => {
+      res.redirect("/login");
+      const mailOptions = {
+        from: "codewithsamiir@gmail.com",
+        to: `${email}`,
+        subject: "Signup successfully",
+        html: "<p>You successfuly singned up using Mailjet !</p>",
+      };
+      return transporter.sendMail(mailOptions);
+    })
+    .catch((err) => {
+      console.log("Eamil send error>>>", err);
+    })
+    // })
     .catch((err) => {
       console.log(err);
     });
