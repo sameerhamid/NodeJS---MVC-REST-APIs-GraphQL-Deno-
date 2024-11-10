@@ -64,7 +64,7 @@ app.use((req, res, next) => {
     })
     .catch((err) => {
       console.log("Error fetching user>>>", err);
-      throw new Error(err);
+      next(new Error(err));
       // req.user = null;
       // next();
     });
