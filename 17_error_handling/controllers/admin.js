@@ -53,7 +53,12 @@ exports.postAddProduct = (req, res, next) => {
     })
     .catch((error) => {
       console.log("Error while saving product: ", error);
-      return res.redirect("/500");
+      // return res.redirect("/500");
+
+      const error = new Error(error);
+      error.httpStatusCode = 500;
+      return next(error);
+
       // return res.status(500).render("admin/edit-product", {
       //   pageTitle: "Add Product",
       //   path: "/admin/add-product",
@@ -97,7 +102,11 @@ exports.getEditProduct = (req, res, next) => {
     })
     .catch((error) => {
       console.log("Error fetching product: ", error);
-      res.redirect("/admin/products");
+      const error = new Error(error);
+      error.httpStatusCode = 500;
+      return next(error);
+
+      // res.redirect("/admin/products");
     });
 };
 
