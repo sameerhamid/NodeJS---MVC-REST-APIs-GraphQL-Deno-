@@ -56,13 +56,17 @@ app.use((req, res, next) => {
   }
   User.findById(req.session.user._id)
     .then((user) => {
+      if (!user) {
+        return next();
+      }
       req.user = user;
       next();
     })
     .catch((err) => {
       console.log("Error fetching user>>>", err);
-      req.user = null;
-      next();
+      throw new Error(err);
+      // req.user = null;
+      // next();
     });
 });
 
