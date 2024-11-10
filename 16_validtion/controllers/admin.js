@@ -10,6 +10,7 @@ exports.getAddProduct = (req, res, next) => {
     editing: false,
     hasError: false,
     errorMsg: null,
+    validationErrors: [],
   });
 };
 
@@ -33,6 +34,7 @@ exports.postAddProduct = (req, res, next) => {
       },
       hasError: true,
       errorMsg: errors.array()[0].msg,
+      validationErrors: errors.array(),
     });
   }
   const product = new Product({
@@ -76,6 +78,7 @@ exports.getEditProduct = (req, res, next) => {
         product,
         hasError: false,
         errorMsg: null,
+        validationErrors: [],
       });
     })
     .catch((error) => {
@@ -86,6 +89,27 @@ exports.getEditProduct = (req, res, next) => {
 
 exports.postEditProduct = (req, res, next) => {
   const { productId, title, price, description, imageUrl } = req.body;
+
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(422).render("admin/edit-product", {
+      pageTitle: "Edit Product",
+      path: "/admin/edit-product",
+      editing: true,
+      product: {
+        title: title,
+        imageUrl: imageUrl,
+        price: price,
+        description: description,
+        _id: productId,
+      },
+      hasError: true,
+      errorMsg: errors.array()[0].msg,
+      validationErrors: errors.array(),
+    });
+  }
+
   Product.findById(productId)
     .then((product) => {
       if (product.userId.toString() !== req.user._id.toString()) {
@@ -95,6 +119,7 @@ exports.postEditProduct = (req, res, next) => {
       product.price = price;
       product.description = description;
       product.imageUrl = imageUrl;
+
       // it will automatically update the product
       return product.save().then((product) => {
         console.log("Product updated successfully");
