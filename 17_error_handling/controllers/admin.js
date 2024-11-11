@@ -51,11 +51,11 @@ exports.postAddProduct = (req, res, next) => {
       console.log("Save product data successfully");
       res.redirect("/admin/products");
     })
-    .catch((error) => {
-      console.log("Error while saving product: ", error);
+    .catch((err) => {
+      console.log("Error while saving product: ", err);
       // return res.redirect("/500");
 
-      const error = new Error(error);
+      const error = new Error(err);
       error.httpStatusCode = 500;
       return next(error);
 
@@ -100,9 +100,9 @@ exports.getEditProduct = (req, res, next) => {
         validationErrors: [],
       });
     })
-    .catch((error) => {
-      console.log("Error fetching product: ", error);
-      const error = new Error(error);
+    .catch((err) => {
+      console.log("Error fetching product: ", err);
+      const error = new Error(err);
       error.httpStatusCode = 500;
       return next(error);
 
