@@ -8,6 +8,7 @@ const MonogoDBStore = require("connect-mongodb-session")(session);
 // for protection cross site request forgery
 const csrf = require("csurf");
 const flash = require("connect-flash");
+const multer = require("multer");
 
 const errorController = require("./controllers/error");
 
@@ -34,6 +35,7 @@ const shopRoutes = require("./routes/shop");
 const authRoutes = require("./routes/auth");
 
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(multer({ dest: "images" }).single("image"));
 app.use(express.static(path.join(__dirname, "public")));
 app.use(
   session({
