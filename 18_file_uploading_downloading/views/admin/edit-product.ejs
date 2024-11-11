@@ -13,7 +13,7 @@
                     </div>
                     <%}%>
                         <form class="product-form" action="/admin/<%= editing ? 'edit-product' : 'add-product' %>"
-                            method="POST">
+                            method="POST" enctype="multipart/form-data">
                             <div class="form-control">
                                 <label for="title">Title</label>
                                 <input class="<%= validationErrors?.find(e=>e.path==='title')?'invalid':'' %>"
