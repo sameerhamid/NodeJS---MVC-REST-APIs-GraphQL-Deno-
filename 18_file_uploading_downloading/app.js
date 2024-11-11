@@ -27,6 +27,18 @@ const store = new MonogoDBStore({
 
 const csrfProtection = csrf();
 
+// multer configuration
+
+// Configure multer storage
+const fileStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "images"); // Ensure the 'image' folder exists or create it before running
+  },
+  filename: (req, file, cb) => {
+    const timestamp = new Date().toISOString().replace(/:/g, "-"); // Replace colons with dashes
+    cb(null, `${timestamp}_${file.originalname}`);
+  },
+});
 app.set("view engine", "ejs");
 app.set("views", "views");
 
@@ -35,7 +47,9 @@ const shopRoutes = require("./routes/shop");
 const authRoutes = require("./routes/auth");
 
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(multer({ dest: "images" }).single("image"));
+// Initialize multer middleware
+app.use(multer({ storage: fileStorage }).single("image"));
+
 app.use(express.static(path.join(__dirname, "public")));
 app.use(
   session({
