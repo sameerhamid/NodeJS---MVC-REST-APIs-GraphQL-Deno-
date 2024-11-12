@@ -36,7 +36,8 @@
                             <div class="form-control">
                                 <label for="price">Price</label>
                                 <input class="<%= validationErrors?.find(e=>e.path==='price')?'invalid':'' %>"
-                                    type="number" name="price" id="price" step="0.01">
+                                    type="number" name="price" id="price" step="0.01"
+                                    value="<%= (editing||hasError) ? product.price : '' %>">
                             </div>
                             <div class="form-control">
                                 <label for="description">Description</label>

@@ -16,12 +16,29 @@ exports.getAddProduct = (req, res, next) => {
 
 exports.postAddProduct = (req, res, next) => {
   const title = req.body.title;
-  const imageUrl = req.file;
+  const image = req.file;
   const price = req.body.price;
   const description = req.body.description;
-  const errors = validationResult(req);
 
-  console.log("imageUrl>>>", imageUrl);
+  if (!image) {
+    return res.status(422).render("admin/edit-product", {
+      pageTitle: "Add Product",
+      path: "/admin/add-product",
+      editing: false,
+      product: {
+        title: title,
+        price: price,
+        description: description,
+      },
+      hasError: true,
+      errorMsg: "Attached file is not an image",
+      validationErrors: [],
+    });
+  }
+
+  const imageUrl = image.path;
+
+  const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
     return res.status(422).render("admin/edit-product", {
@@ -30,7 +47,6 @@ exports.postAddProduct = (req, res, next) => {
       editing: false,
       product: {
         title: title,
-        imageUrl: imageUrl,
         price: price,
         description: description,
       },
@@ -113,7 +129,8 @@ exports.getEditProduct = (req, res, next) => {
 };
 
 exports.postEditProduct = (req, res, next) => {
-  const { productId, title, price, description, imageUrl } = req.body;
+  const { productId, title, price, description } = req.body;
+  const image = req.file;
 
   const errors = validationResult(req);
 
@@ -124,7 +141,6 @@ exports.postEditProduct = (req, res, next) => {
       editing: true,
       product: {
         title: title,
-        imageUrl: imageUrl,
         price: price,
         description: description,
         _id: productId,
@@ -143,7 +159,9 @@ exports.postEditProduct = (req, res, next) => {
       product.title = title;
       product.price = price;
       product.description = description;
-      product.imageUrl = imageUrl;
+      if (image) {
+        product.imageUrl = image.path;
+      }
 
       // it will automatically update the product
       return product.save().then((product) => {
