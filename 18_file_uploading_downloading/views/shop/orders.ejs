@@ -8,13 +8,13 @@
                     <ul class="order_cont">
                         <% orders.forEach(order=>{%>
                             <li>
-                                <h1>Order - # <%= order._id %>
+                                <h1>Order - # <%= order._id %> - <a href="/orders/<%= order._id%>">Invoice</a>
                                 </h1>
                                 <ul class="cont">
                                     <% order.products.forEach(item=>{ %>
                                         <li>
                                             <%= item.product.title%> (<%= item.quantity%>)
-                                                    - <a href="/orders/<%= order._id%>">Invoice</a>
+
                                         </li>
                                         <% }) %>
                                 </ul>
