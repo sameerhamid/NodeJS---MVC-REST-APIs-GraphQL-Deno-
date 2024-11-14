@@ -1,5 +1,15 @@
 const deleteProduct = (btn) => {
   const productId = btn.parentNode.querySelector("[name=productId]").value;
-  const crf = btn.parentNode.querySelector("[name=_csrf]").value;
-  console.log(crf);
+  const csrf = btn.parentNode.querySelector("[name=_csrf]").value;
+
+  fetch(`/admin/product/${productId}`, {
+    method: "DELETE",
+    headers: {
+      "csrf-token": csrf,
+    },
+  })
+    .then((res) => {})
+    .catch((err) => {
+      console.log("Error while deleting>>>", err);
+    });
 };
