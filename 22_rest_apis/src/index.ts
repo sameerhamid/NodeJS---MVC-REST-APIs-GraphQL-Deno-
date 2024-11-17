@@ -7,6 +7,13 @@ const app = express();
 
 app.use(bodyParser.json()); // application/json
 
+/**
+ * Middleware to set CORS headers for all incoming requests
+ * @function
+ * @param {Request} _req - Express request object (unused)
+ * @param {Response} res - Express response object
+ * @param {NextFunction} next - Express next middleware function
+ */
 app.use((_req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
