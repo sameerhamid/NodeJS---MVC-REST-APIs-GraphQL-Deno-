@@ -1,6 +1,10 @@
 const fs = require("fs");
 const PDFDocument = require("pdfkit");
 
+const stripe = require("stripe")(
+  "sk_test_51OlrSRSHi37alanBdIW5pfnjcK8kh8EAs3dnkmHDks8z07I683v0zxo1ng1omvoIObbYluRhKA1VAVjfe4PnKHOG00cucxvOcs"
+);
+
 const path = require("path");
 const Product = require("../models/product");
 const Order = require("../models/order");
@@ -171,6 +175,37 @@ exports.postOrders = (req, res, next) => {
     });
 };
 
+exports.getCheckoutSuccess = (req, res, next) => {
+  req.user
+    .populate("cart.items.productId")
+    .then((user) => {
+      const products = user.cart.items.map((item) => {
+        return {
+          quantity: item.quantity,
+          product: { ...item.productId._doc },
+        };
+      });
+      const order = new Order({
+        user: {
+          email: req.user.email,
+          userId: req.user,
+        },
+        products: products,
+      });
+
+      return order.save();
+    })
+    .then((result) => {
+      return req.user.clearCart();
+    })
+    .then(() => {
+      res.redirect("/orders");
+    })
+    .catch((error) => {
+      console.log("Error while adding order", error);
+      res.redirect("/cart");
+    });
+};
 exports.getOrders = (req, res, next) => {
   Order.find({ "user.userId": req.user._id })
     .then((orders) => {
@@ -244,20 +279,46 @@ exports.getInvoice = (req, res, next) => {
 };
 
 exports.getCheckout = (req, res, next) => {
+  let products;
+  let total = 0;
+
   req.user
     .populate("cart.items.productId")
     .then((user) => {
-      const products = user.cart.items;
-      let total = 0;
+      products = user.cart.items;
+      total = 0;
+
       products.forEach((p) => {
         total += p.quantity * p.productId.price;
       });
 
+      return stripe.checkout.sessions.create({
+        payment_method_types: ["card"], // Accept domestic card payments only
+        line_items: products.map((p) => {
+          return {
+            price_data: {
+              currency: "inr", // Set currency to INR
+              product_data: {
+                name: p.productId.title,
+                description: p.productId.description,
+              },
+              unit_amount: Math.round(p.productId.price * 100), // Convert price to smallest currency unit
+            },
+            quantity: p.quantity,
+          };
+        }),
+        mode: "payment", // Payment mode for one-time purchases
+        success_url: `${req.protocol}://${req.get("host")}/checkout/success`,
+        cancel_url: `${req.protocol}://${req.get("host")}/checkout/cancel`,
+      });
+    })
+    .then((session) => {
       res.render("shop/checkout", {
         path: "/checkout",
         pageTitle: "Checkout",
         products: products,
         totalSum: total,
+        sessionId: session.id,
       });
     })
     .catch((error) => {

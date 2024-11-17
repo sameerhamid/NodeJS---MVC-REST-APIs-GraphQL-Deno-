@@ -25,6 +25,20 @@
                             </h2>
                         </div>
 
+                        <div class="centered">
+                            <button id="order-btn" class="btn">ORDER</button>
+                            <script src="https://js.stripe.com/v3/"></script>
+                            <script>
+                                let stripe = Stripe('pk_test_51OlrSRSHi37alanBhRN5Zza9BZ0SCSXss9yqzLyx5y5M36YQ6RNdKeXOzskuMw9vKc3JynlcAgW374Uz3WgerQDR00k6Z8LXUW')
+                                let orderBtn = document.getElementById('order-btn')
+                                orderBtn.addEventListener('click', () => {
+                                    stripe.redirectToCheckout({
+                                        sessionId: "<%= sessionId%>"
+                                    })
+                                })
+                            </script>
+                        </div>
+
 
             </main>
             <%- include('../includes/end.ejs') %>
