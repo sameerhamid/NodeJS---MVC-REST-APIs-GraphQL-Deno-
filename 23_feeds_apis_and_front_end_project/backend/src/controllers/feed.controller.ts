@@ -20,26 +20,6 @@ export const getPosts = (req: Request, res: Response, next: NextFunction) => {
         },
         createdAt: new Date(),
       },
-      {
-        _id: 2,
-        title: "Second post",
-        content: "This is the second post",
-        imageUrl: "/public/images/duck.jpg",
-        creator: {
-          name: "sameer",
-        },
-        createdAt: new Date(),
-      },
-      {
-        _id: 3,
-        title: "Third post",
-        content: "This is the third post",
-        imageUrl: "/public/images/duck.jpg",
-        creator: {
-          name: "sameer",
-        },
-        createdAt: new Date(),
-      },
     ],
   });
 };
@@ -58,9 +38,14 @@ export const createPost = (req: Request, res: Response, next: NextFunction) => {
   res.status(201).json({
     message: "Post created successfully!",
     post: {
-      id: new Date().getTime(),
+      _id: new Date().getTime(),
       title,
       content,
+      imageUrl: "/public/images/duck.jpg",
+      creator: {
+        name: "sameer",
+      },
+      createdAt: new Date(),
     },
   });
 };
