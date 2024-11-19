@@ -1,11 +1,13 @@
 import express from "express";
 import bodyParser from "body-parser";
+import mongoose from "mongoose";
 import feedRoutes from "./routes/feed.route";
 
 const app = express();
 // app.use(bodyParser.urlencoded({ extended: false })); //x-www-form-urlencoded
 
-app.use(bodyParser.json()); // application/json
+// parse application/json
+app.use(bodyParser.json());
 
 /**
  * Middleware to set CORS headers for all incoming requests
@@ -28,6 +30,21 @@ app.use((_req, res, next) => {
 app.use("/feed", feedRoutes);
 
 const PORT = 8080;
-app.listen(PORT, () => {
-  console.log("Server is running on port " + PORT);
-});
+
+// Connect to the MongoDB database
+mongoose
+  .connect(
+    "mongodb+srv://codewithsamiir:NSXtwPvAKpa1RFra@cluster0.zfjhc.mongodb.net/"
+  )
+  .then((result) => {
+    // Successfully connected to the MongoDB database
+    console.log("Connected to MongoDB!");
+    // Start the server and listen on the specified port
+    app.listen(PORT, () => {
+      console.log("Server is running on port " + PORT);
+    });
+  })
+  .catch((err) => {
+    // Log the error if the connection to MongoDB fails
+    console.log("Error while connecting to MongoDB...", err);
+  });
