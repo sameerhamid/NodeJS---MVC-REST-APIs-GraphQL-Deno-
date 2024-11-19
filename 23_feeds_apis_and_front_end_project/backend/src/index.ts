@@ -34,7 +34,7 @@ const PORT = 8080;
 // Connect to the MongoDB database
 mongoose
   .connect(
-    "mongodb+srv://codewithsamiir:NSXtwPvAKpa1RFra@cluster0.zfjhc.mongodb.net/"
+    "mongodb+srv://codewithsamiir:NSXtwPvAKpa1RFra@cluster0.zfjhc.mongodb.net/feeds"
   )
   .then((result) => {
     // Successfully connected to the MongoDB database
