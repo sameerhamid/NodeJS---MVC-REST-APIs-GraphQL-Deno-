@@ -11,19 +11,34 @@ export const getPosts = (req: Request, res: Response, next: NextFunction) => {
   res.status(200).json({
     posts: [
       {
-        id: 1,
+        _id: 1,
         title: "First post",
         content: "This is the first post",
+        imageUrl: "/public/images/duck.jpg",
+        creator: {
+          name: "sameer",
+        },
+        createdAt: new Date(),
       },
       {
-        id: 2,
+        _id: 2,
         title: "Second post",
         content: "This is the second post",
+        imageUrl: "/public/images/duck.jpg",
+        creator: {
+          name: "sameer",
+        },
+        createdAt: new Date(),
       },
       {
-        id: 3,
+        _id: 3,
         title: "Third post",
         content: "This is the third post",
+        imageUrl: "/public/images/duck.jpg",
+        creator: {
+          name: "sameer",
+        },
+        createdAt: new Date(),
       },
     ],
   });
