@@ -11,13 +11,16 @@ import { ErrorType } from "../types/Error.type";
  * @param {NextFunction} next - Express next middleware function
  */
 export const getPosts = (req: Request, res: Response, next: NextFunction) => {
+  // Retrieve all posts from the database
   Post.find()
     .then((posts) => {
+      // Return the posts with a success message
       res
         .status(200)
         .json({ message: "Fetch posts successfully.", posts: posts });
     })
     .catch((err: ErrorType) => {
+      // If an error occurs, set the status code to 500 and pass it to the next middleware
       if (!err.statusCode) {
         err.statusCode = 500;
       }
@@ -86,20 +89,28 @@ export const createPost = (req: Request, res: Response, next: NextFunction) => {
 export const getPost = (req: Request, res: Response, next: NextFunction) => {
   const postId = req.params.postId;
 
+  // Retrieve a post from the database by it's ObjectId
   Post.findById(postId)
     .then((post) => {
+      // If the post does not exist, throw an error
       if (!post) {
-        const error: any = new Error("Could not find post.");
+        const error: ErrorType = new Error("Could not find post.");
         error.statusCode = 404;
         throw error;
       }
 
-      res.status(200).json({ message: "Post fetched.", post: post });
+      // Return a successful response with the post
+      res.status(200).json({
+        message: "Post fetched.",
+        post: post,
+      });
     })
     .catch((err: ErrorType) => {
+      // If there is an error, check if it has a status code
       if (!err.statusCode) {
         err.statusCode = 500;
       }
+      // Pass the error to the next middleware function
       next(err);
     });
 };

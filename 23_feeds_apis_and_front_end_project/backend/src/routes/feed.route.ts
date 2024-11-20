@@ -28,6 +28,12 @@ router.post(
   createPost
 );
 
+/**
+ * @swagger
+ * /feed/post/{postId}:
+ *   get:
+ *     summary: Get a single post
+ */
 router.get("/post/:postId", getPost);
 
 export default router;
