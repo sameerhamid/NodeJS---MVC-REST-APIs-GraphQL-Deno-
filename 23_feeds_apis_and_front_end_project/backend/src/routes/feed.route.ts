@@ -1,7 +1,7 @@
 import exrpess from "express";
 import { body } from "express-validator";
 
-import { createPost, getPosts } from "../controllers/feed.controller";
+import { createPost, getPost, getPosts } from "../controllers/feed.controller";
 
 const router = exrpess.Router();
 
@@ -27,5 +27,7 @@ router.post(
   ],
   createPost
 );
+
+router.get("/post/:postId", getPost);
 
 export default router;

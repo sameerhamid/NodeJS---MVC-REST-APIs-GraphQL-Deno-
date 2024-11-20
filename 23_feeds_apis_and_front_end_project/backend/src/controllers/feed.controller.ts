@@ -1,6 +1,7 @@
 import e, { NextFunction, Request, Response } from "express";
 import { validationResult } from "express-validator";
 import Post from "../models/post.model";
+import { ErrorType } from "../types/Error.type";
 
 /**
  * Retrieves a list of posts from the database
@@ -10,20 +11,18 @@ import Post from "../models/post.model";
  * @param {NextFunction} next - Express next middleware function
  */
 export const getPosts = (req: Request, res: Response, next: NextFunction) => {
-  res.status(200).json({
-    posts: [
-      {
-        _id: 1,
-        title: "First post",
-        content: "This is the first post",
-        imageUrl: "/public/images/duck.jpg",
-        creator: {
-          name: "sameer",
-        },
-        createdAt: new Date(),
-      },
-    ],
-  });
+  Post.find()
+    .then((posts) => {
+      res
+        .status(200)
+        .json({ message: "Fetch posts successfully.", posts: posts });
+    })
+    .catch((err: ErrorType) => {
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      next(err);
+    });
 };
 
 /**
@@ -68,7 +67,36 @@ export const createPost = (req: Request, res: Response, next: NextFunction) => {
         post: result,
       });
     })
-    .catch((err) => {
+    .catch((err: ErrorType) => {
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      next(err);
+    });
+};
+
+/**
+ * Retrieves a post from the database
+ * @function getPost
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ * @param {NextFunction} next - Express next middleware function
+ * @returns {Promise<void>}
+ */
+export const getPost = (req: Request, res: Response, next: NextFunction) => {
+  const postId = req.params.postId;
+
+  Post.findById(postId)
+    .then((post) => {
+      if (!post) {
+        const error: any = new Error("Could not find post.");
+        error.statusCode = 404;
+        throw error;
+      }
+
+      res.status(200).json({ message: "Post fetched.", post: post });
+    })
+    .catch((err: ErrorType) => {
       if (!err.statusCode) {
         err.statusCode = 500;
       }
