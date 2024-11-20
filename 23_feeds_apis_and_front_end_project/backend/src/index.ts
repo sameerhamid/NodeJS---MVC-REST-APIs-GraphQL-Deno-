@@ -24,7 +24,7 @@ const fileStorage = multer.diskStorage({
    *   file that was stored.
    */
   destination: (_req, _file, cb) => {
-    cb(null, "../public/images");
+    cb(null, "./public/images");
   },
   /**
    * Multer's filename callback.  This callback is used to specify the
@@ -84,7 +84,10 @@ app.use(
 
 // Serve static images from the public/images folder
 // This allows the frontend to access the images when rendering posts
-app.use("/images", express.static(path.join(__dirname, "../public/images")));
+app.use(
+  "/public/images",
+  express.static(path.join(__dirname, "../public/images"))
+);
 
 /**
  * Middleware to set CORS headers for all incoming requests

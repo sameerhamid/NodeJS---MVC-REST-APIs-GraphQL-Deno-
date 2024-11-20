@@ -46,13 +46,24 @@ export const createPost = (req: Request, res: Response, next: NextFunction) => {
     error.statusCode = 422;
     throw error;
   }
+
+  // Check if a file was uploaded
+  if (!req.file) {
+    // If no file was uploaded, throw an error
+    const error: any = new Error("No image provided.");
+    error.statusCode = 422;
+    throw error;
+  }
+
+  // Store the path of the uploaded image in a variable
+  const imageUrl = req.file.path;
   const { title, content } = req.body;
 
   // Create a new post document
   const post = new Post({
     title,
     content,
-    imageUrl: "/public/images/duck.jpg",
+    imageUrl: imageUrl,
     creator: {
       name: "sameer",
     },
