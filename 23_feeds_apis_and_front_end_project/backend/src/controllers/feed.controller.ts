@@ -1,6 +1,6 @@
 import e, { NextFunction, Request, Response } from "express";
 import { validationResult } from "express-validator";
-
+import Post from "../models/post.model";
 /**
  * Retrieves a list of posts from the database
  * @function getPosts
@@ -42,18 +42,25 @@ export const createPost = (req: Request, res: Response, next: NextFunction) => {
   }
   const { title, content } = req.body;
 
-  // create post in db
-  res.status(201).json({
-    message: "Post created successfully!",
-    post: {
-      _id: new Date().getTime(),
-      title,
-      content,
-      imageUrl: "/public/images/duck.jpg",
-      creator: {
-        name: "sameer",
-      },
-      createdAt: new Date(),
+  const post = new Post({
+    title,
+    content,
+    imageUrl: "/public/images/duck.jpg",
+    creator: {
+      name: "sameer",
     },
   });
+
+  post
+    .save()
+    .then((result) => {
+      console.log("Created post>>>", result);
+      res.status(201).json({
+        message: "Post created successfully!",
+        post: result,
+      });
+    })
+    .catch((err) => {
+      console.log("Error creating post>>>", err);
+    });
 };
