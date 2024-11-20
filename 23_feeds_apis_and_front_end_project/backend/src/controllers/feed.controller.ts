@@ -1,6 +1,7 @@
 import e, { NextFunction, Request, Response } from "express";
 import { validationResult } from "express-validator";
 import Post from "../models/post.model";
+
 /**
  * Retrieves a list of posts from the database
  * @function getPosts
@@ -33,15 +34,19 @@ export const getPosts = (req: Request, res: Response, next: NextFunction) => {
  * @param {NextFunction} next - Express next middleware function
  */
 export const createPost = (req: Request, res: Response, next: NextFunction) => {
+  // Validate the input data
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    res.status(422).json({
-      message: "Validation failed, entered data is incorrect.",
-      errors: errors.array(),
-    });
+    // Return an error response if the validation fails
+    const error: any = new Error(
+      "Validation failed, entered data is incorrect."
+    );
+    error.statusCode = 422;
+    throw error;
   }
   const { title, content } = req.body;
 
+  // Create a new post document
   const post = new Post({
     title,
     content,
@@ -51,16 +56,22 @@ export const createPost = (req: Request, res: Response, next: NextFunction) => {
     },
   });
 
+  // Save the post to the database
   post
     .save()
     .then((result) => {
+      // Log the result of creating the post
       console.log("Created post>>>", result);
+      // Return a successful response with the created post
       res.status(201).json({
         message: "Post created successfully!",
         post: result,
       });
     })
     .catch((err) => {
-      console.log("Error creating post>>>", err);
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      next(err);
     });
 };
