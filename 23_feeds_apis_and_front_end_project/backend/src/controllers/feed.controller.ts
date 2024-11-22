@@ -4,6 +4,7 @@ import e, { NextFunction, Request, Response } from "express";
 import { validationResult } from "express-validator";
 import Post from "../models/post.model";
 import { ErrorType } from "../types/Error.type";
+import { clearImage } from "../utils/clearImage.util";
 
 /**
  * Retrieves a list of posts from the database
@@ -205,18 +206,31 @@ export const updatePost = (req: Request, res: Response, next: NextFunction) => {
     });
 };
 
-/**
- * Deletes a file asynchronously and handles any errors
- * @param {string} filePath - the path to the file to delete
- */
-const clearImage = (filePath: string): void => {
-  // Construct the full file path
-  filePath = path.join(__dirname, "../..", filePath);
+export const deletePost = (req: Request, res: Response, next: NextFunction) => {
+  // Retrieve the post ID from the request parameters
+  const { postId } = req.params;
 
-  // Delete the file asynchronously and handle any errors
-  fs.unlink(filePath, (err) => {
-    if (err) {
-      console.error("Error deleting the file:", err);
-    }
-  });
+  // Find the post by ID
+  Post.findById(postId)
+    .then((post) => {
+      // Check logged in user
+      if (!post) {
+        const error: ErrorType = new Error("Could not find post.");
+        error.statusCode = 404;
+        throw error;
+      }
+      clearImage(post.imageUrl);
+      return Post.findByIdAndDelete(postId);
+    })
+    .then((result) => {
+      console.log("Post deleted successfully", result);
+      res.status(200).json({ message: "Deleted post." });
+    })
+    .catch((err: ErrorType) => {
+      // Set the status code to 500 if not already set and pass the error to the next middleware
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      next(err);
+    });
 };
