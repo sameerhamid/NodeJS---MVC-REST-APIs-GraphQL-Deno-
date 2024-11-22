@@ -4,6 +4,7 @@ import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import multer from "multer";
 import feedRoutes from "./routes/feed.route";
+import authRoutes from "./routes/auth.routes";
 import { ErrorType } from "./types/Error.type";
 
 const app = express();
@@ -108,6 +109,12 @@ app.use((_req, res, next) => {
 
 //--------------- GET /feed/posts ----------------
 app.use("/feed", feedRoutes);
+
+//---------------  POST /auth/signup, POST /auth/login ----------------
+// These routes are used for user authentication
+// The signup route creates a new user in the database
+// The login route authenticates a user and returns a JSON Web Token
+app.use("/auth", authRoutes);
 
 // Custom error handling middleware
 // This middleware catches any errors that are thrown from the

@@ -1,7 +1,32 @@
 import mongoose, { Schema } from "mongoose";
 
+/**
+ * Represents a post in the application
+ */
+export interface PostType {
+  /** Unique identifier for the post */
+  _id: string;
+  /** Title of the post */
+  title: string;
+  /** Content of the post */
+  content: string;
+  /** URL of the post's image */
+  imageUrl: string;
+  /** Creator of the post */
+  creator: {
+    /** Unique identifier for the creator */
+    _id: string;
+    /** Name of the creator */
+    name: string;
+    /** Email of the creator */
+    email: string;
+  };
+  /** Date when the post was created */
+  createdAt: string;
+}
+
 // Define the schema for a post
-const postSchema = new Schema(
+const postSchema = new Schema<PostType>(
   {
     // Title of the post
     title: {
