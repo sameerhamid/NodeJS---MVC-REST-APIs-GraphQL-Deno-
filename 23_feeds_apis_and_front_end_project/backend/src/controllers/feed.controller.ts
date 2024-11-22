@@ -1,5 +1,3 @@
-import fs from "fs";
-import path from "path";
 import e, { NextFunction, Request, Response } from "express";
 import { validationResult } from "express-validator";
 import Post from "../models/post.model";
@@ -165,7 +163,11 @@ export const getPost = (req: Request, res: Response, next: NextFunction) => {
  * @param {NextFunction} next - Express next middleware function
  * @returns {Promise<void>}
  */
-export const updatePost = (req: Request, res: Response, next: NextFunction) => {
+export const updatePost = (
+  req: Request & { userId?: string },
+  res: Response,
+  next: NextFunction
+) => {
   // Validate the input data
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -208,6 +210,14 @@ export const updatePost = (req: Request, res: Response, next: NextFunction) => {
         throw error;
       }
 
+      if (post.creator.toString() !== req?.userId?.toString()) {
+        const error: ErrorType = new Error(
+          "Only the creator can update the post."
+        );
+        error.statusCode = 403;
+        throw error;
+      }
+
       // If the image URL has changed, delete the old image file
       if (imageUrl !== post.imageUrl) {
         clearImage(post.imageUrl);
@@ -234,7 +244,11 @@ export const updatePost = (req: Request, res: Response, next: NextFunction) => {
     });
 };
 
-export const deletePost = (req: Request, res: Response, next: NextFunction) => {
+export const deletePost = (
+  req: Request & { userId?: string },
+  res: Response,
+  next: NextFunction
+) => {
   // Retrieve the post ID from the request parameters
   const { postId } = req.params;
 
@@ -245,6 +259,13 @@ export const deletePost = (req: Request, res: Response, next: NextFunction) => {
       if (!post) {
         const error: ErrorType = new Error("Could not find post.");
         error.statusCode = 404;
+        throw error;
+      }
+      if (post.creator.toString() !== req?.userId?.toString()) {
+        const error: ErrorType = new Error(
+          "Only the creator can update the post."
+        );
+        error.statusCode = 403;
         throw error;
       }
       clearImage(post.imageUrl);

@@ -16,6 +16,7 @@ export interface PostType {
   creator: {
     /** Unique identifier for the creator */
     _id: string;
+    name: string;
   };
   /** Date when the post was created */
   createdAt: string;
@@ -43,6 +44,10 @@ const postSchema = new Schema<PostType>(
     creator: {
       type: Schema.Types.ObjectId,
       ref: "User",
+      name: {
+        type: String,
+        required: true,
+      },
       required: true, // Creator is required
     },
   },

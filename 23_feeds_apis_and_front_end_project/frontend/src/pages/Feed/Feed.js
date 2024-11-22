@@ -117,7 +117,7 @@ class Feed extends Component {
 
     const formData = new FormData();
     formData.append("title", postData.title);
-    formData.append("content", postData.title);
+    formData.append("content", postData.content);
     formData.append("image", postData.image);
 
     let url = "http://localhost:8080/feed/post";
