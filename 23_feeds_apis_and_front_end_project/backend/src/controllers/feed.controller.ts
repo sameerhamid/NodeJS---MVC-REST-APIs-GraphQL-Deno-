@@ -1,6 +1,6 @@
 import e, { NextFunction, Request, Response } from "express";
 import { validationResult } from "express-validator";
-import Post from "../models/post.model";
+import Post, { PostType } from "../models/post.model";
 import { ErrorType } from "../types/Error.type";
 import { clearImage } from "../utils/clearImage.util";
 import User, { UserType } from "../models/user.model";
@@ -127,9 +127,14 @@ export const createPost = (
  * @param {NextFunction} next - Express next middleware function
  * @returns {Promise<void>}
  */
-export const getPost = (req: Request, res: Response, next: NextFunction) => {
+export const getPost = (
+  req: Request & { userId?: string },
+  res: Response,
+  next: NextFunction
+) => {
   const postId = req.params.postId;
 
+  let myPost: PostType;
   // Retrieve a post from the database by it's ObjectId
   Post.findById(postId)
     .then((post) => {
@@ -139,11 +144,22 @@ export const getPost = (req: Request, res: Response, next: NextFunction) => {
         error.statusCode = 404;
         throw error;
       }
+      myPost = post;
+      return User.findById(req.userId);
+    })
+    .then((user) => {
+      if (!user) {
+        const error: ErrorType = new Error("User not found");
+        error.statusCode = 404;
+        throw error;
+      }
 
       // Return a successful response with the post
+
       res.status(200).json({
-        message: "Post fetched.",
-        post: post,
+        message: "Post fetched successfully.",
+        post: myPost,
+        creator: { _id: user._id, name: user.name, email: user.email },
       });
     })
     .catch((err: ErrorType) => {

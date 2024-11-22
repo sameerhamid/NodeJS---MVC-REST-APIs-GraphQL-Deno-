@@ -97,7 +97,7 @@ class App extends Component {
         this.setAutoLogout(remainingMilliseconds);
       })
       .catch((err) => {
-        console.log(err);
+        console.log("error>>>", err);
         this.setState({
           isAuth: false,
           authLoading: false,
@@ -138,7 +138,7 @@ class App extends Component {
         this.props.history.replace("/");
       })
       .catch((err) => {
-        console.log(err);
+        console.log("error>>>", err);
         this.setState({
           isAuth: false,
           authLoading: false,
