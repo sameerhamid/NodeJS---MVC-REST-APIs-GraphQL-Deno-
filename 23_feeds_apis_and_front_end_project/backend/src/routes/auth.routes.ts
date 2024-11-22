@@ -1,10 +1,19 @@
 import express from "express";
 import { body } from "express-validator";
-import { signUp } from "../controllers/auth.controller";
+import { login, signUp } from "../controllers/auth.controller";
 import User from "../models/user.model";
 
 const router = express.Router();
 
+/**
+ * POST /signup
+ * @summary Create or update a user
+ * @description Register or update  new user with an email, password, and name.
+ * @param {string} email - The email address of the user
+ * @param {string} password - The password of the user
+ * @param {string} name - The name of the user
+
+ */
 router.put(
   "/signup",
   [
@@ -28,4 +37,12 @@ router.put(
   signUp
 );
 
+/**
+ * POST /login
+ * @summary Login a user
+ * @description Login a user with email and password
+ * @param {string} email - The email address of the user
+ * @param {string} password - The password of the user
+ */
+router.post("/login", login);
 export default router;

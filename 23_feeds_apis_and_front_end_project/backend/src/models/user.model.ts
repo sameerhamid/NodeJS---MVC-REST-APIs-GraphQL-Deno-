@@ -5,6 +5,7 @@ import { PostType } from "./post.model";
  * Represents a user in the application
  */
 export interface UserType {
+  _id: string;
   /**
    * The email address of the user
    */

@@ -1,9 +1,20 @@
 import { NextFunction, Request, Response } from "express";
 import { ValidationError, validationResult } from "express-validator";
-import User from "../models/user.model";
+import jwt from "jsonwebtoken";
+import User, { UserType } from "../models/user.model";
 import { ErrorType } from "../types/Error.type";
-import { processBcrypt } from "../utils/Encryption.utils";
+import { processBcrypt } from "../utils/encryption.util";
 
+/**
+ * Handles user signup by validating input data, hashing the password,
+ * creating a new user in the database, and returning a success response.
+ * If validation fails, throws an error with status code 422.
+ * If any other error occurs during the process, passes the error to the next middleware.
+ *
+ * @param {Request} req - Express request object containing user data.
+ * @param {Response} res - Express response object for sending a response.
+ * @param {NextFunction} next - Express next middleware function for error handling.
+ */
 export const signUp = (req: Request, res: Response, next: NextFunction) => {
   const errors = validationResult(req);
   const errorData: ValidationError[] = errors.array();
@@ -23,6 +34,49 @@ export const signUp = (req: Request, res: Response, next: NextFunction) => {
       res.status(201).json({
         message: "User created!",
         userId: result._id,
+      });
+    })
+    .catch((err) => {
+      // If there is an error, check if it has a status code
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      // Pass the error to the next middleware function
+      next(err);
+    });
+};
+
+export const login = (req: Request, res: Response, next: NextFunction) => {
+  const { email, password } = req.body;
+  let loadedUser: UserType;
+  User.findOne({ email })
+    .then((user) => {
+      if (!user) {
+        const error: ErrorType = new Error("User not found.");
+        error.statusCode = 401;
+        throw error;
+      }
+      loadedUser = user;
+      return processBcrypt("verify", password, user.password);
+    })
+    .then((isValid) => {
+      if (!isValid) {
+        const error: ErrorType = new Error("Invalid password.");
+        error.statusCode = 401;
+        throw error;
+      }
+      const token = jwt.sign(
+        {
+          email,
+          userId: loadedUser?._id?.toString() ?? "",
+        },
+        "secret",
+        { expiresIn: "1h" }
+      );
+      res.status(200).json({
+        message: "Login successful",
+        token: token,
+        userId: loadedUser._id,
       });
     })
     .catch((err) => {
