@@ -7,11 +7,13 @@ import User, { UserType } from "../models/user.model";
 import { Types } from "mongoose";
 
 /**
- * Retrieves a list of posts from the database
+ * Retrieves a paginated list of posts from the database.
  * @function getPosts
- * @param {Request} req - Express request object
- * @param {Response} res - Express response object
- * @param {NextFunction} next - Express next middleware function
+ * @param {Request} req - Express request object containing query parameters.
+ * @param {Response} res - Express response object for sending the response.
+ * @param {NextFunction} next - Express next middleware function for error handling.
+ * @returns {Promise<void>} - Returns a JSON response with a message, list of posts, and total count of items.
+ * @throws {ErrorType} - If an error occurs during the database query, passes the error to the next middleware.
  */
 export const getPosts = async (
   req: Request,
@@ -46,11 +48,12 @@ export const getPosts = async (
 /**
  * Creates a new post in the database
  * @function createPost
- * @param {Request} req - Express request object
+ * @param {Request & { userId?: string }} req - Express request object with a userId property
  * @param {Response} res - Express response object
  * @param {NextFunction} next - Express next middleware function
+ * @throws {ErrorType} If the validation fails or if no image was provided
  */
-export const createPost = (
+export const createPost = async (
   req: Request & { userId?: string },
   res: Response,
   next: NextFunction
@@ -87,100 +90,86 @@ export const createPost = (
     posts: [],
   });
 
-  // Save the post to the database
-  post
-    .save()
-    .then((result) => {
-      return User.findById(req.userId);
-    })
-    .then((user) => {
-      if (!user) {
-        const error: ErrorType = new Error("User not found");
-        error.statusCode = 404;
-        throw error;
-      }
-      creator = user;
-      user.posts.push(post);
-      return user.save();
-    })
-    .then((result) => {
-      // Return a successful response with the created post
-      res.status(201).json({
-        message: "Post created successfully!",
-        post: post,
-        creator: { _id: creator._id, name: creator.name, email: creator.email },
-      });
-    })
-    .catch((err: ErrorType) => {
-      if (!err.statusCode) {
-        err.statusCode = 500;
-      }
-      next(err);
+  try {
+    const newPost = await post.save();
+    const user = await User.findById(req.userId);
+    if (!user) {
+      const error: ErrorType = new Error("User not found");
+      error.statusCode = 404;
+      throw error;
+    }
+    user.posts.push(newPost);
+
+    await user.save();
+    res.status(201).json({
+      message: "Post created successfully!",
+      post: newPost,
+      creator: { _id: user._id, name: user.name, email: user.email },
     });
+  } catch (error) {
+    const err = error as ErrorType;
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
 };
 
 /**
- * Retrieves a post from the database
+ * Retrieves a specific post from the database using its ID.
  * @function getPost
- * @param {Request} req - Express request object
- * @param {Response} res - Express response object
- * @param {NextFunction} next - Express next middleware function
- * @returns {Promise<void>}
+ * @param {Request & { userId?: string }} req - Express request object containing the postId parameter and optional userId.
+ * @param {Response} res - Express response object to send the response.
+ * @param {NextFunction} next - Express next middleware function for error handling.
+ * @returns {Promise<void>} - Returns a JSON response with a message, the retrieved post, and the post creator's information.
+ * @throws {ErrorType} - Throws an error if the post or user is not found, or if an error occurs during the database query.
  */
-export const getPost = (
+export const getPost = async (
   req: Request & { userId?: string },
   res: Response,
   next: NextFunction
 ) => {
   const postId = req.params.postId;
 
-  let myPost: PostType;
-  // Retrieve a post from the database by it's ObjectId
-  Post.findById(postId)
-    .then((post) => {
-      // If the post does not exist, throw an error
-      if (!post) {
-        const error: ErrorType = new Error("Could not find post.");
-        error.statusCode = 404;
-        throw error;
-      }
-      myPost = post;
-      return User.findById(req.userId);
-    })
-    .then((user) => {
-      if (!user) {
-        const error: ErrorType = new Error("User not found");
-        error.statusCode = 404;
-        throw error;
-      }
+  try {
+    const post = await Post.findById(postId);
+    if (!post) {
+      const error: ErrorType = new Error("Could not find post.");
+      error.statusCode = 404;
+      throw error;
+    }
 
-      // Return a successful response with the post
+    const user = await User.findById(req.userId);
+    if (!user) {
+      const error: ErrorType = new Error("User not found");
+      error.statusCode = 404;
+      throw error;
+    }
 
-      res.status(200).json({
-        message: "Post fetched successfully.",
-        post: myPost,
-        creator: { _id: user._id, name: user.name, email: user.email },
-      });
-    })
-    .catch((err: ErrorType) => {
-      // If there is an error, check if it has a status code
-      if (!err.statusCode) {
-        err.statusCode = 500;
-      }
-      // Pass the error to the next middleware function
-      next(err);
+    res.status(200).json({
+      message: "Post fetched successfully.",
+      post: post,
+      creator: { _id: user._id, name: user.name, email: user.email },
     });
+  } catch (error) {
+    const err = error as ErrorType;
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    // Pass the error to the next middleware function
+    next(err);
+  }
 };
 
 /**
- * Updates a post in the database
+ * Updates an existing post in the database.
  * @function updatePost
- * @param {Request} req - Express request object
- * @param {Response} res - Express response object
- * @param {NextFunction} next - Express next middleware function
- * @returns {Promise<void>}
+ * @param {Request} req - Express request object with a userId property.
+ * @param {Response} res - Express response object.
+ * @param {NextFunction} next - Express next middleware function for error handling.
+ * @throws {ErrorType} - If the validation fails, or if the post or user is not found, or if an error occurs during the database query.
  */
-export const updatePost = (
+export const updatePost = async (
   req: Request & { userId?: string },
   res: Response,
   next: NextFunction
@@ -217,51 +206,55 @@ export const updatePost = (
     throw error;
   }
 
-  // Find the post by ID
-  Post.findById(postId)
-    .then((post) => {
-      // If the post is not found, throw a 404 error
-      if (!post) {
-        const error: ErrorType = new Error("Could not find post.");
-        error.statusCode = 404;
-        throw error;
-      }
+  try {
+    const post = await Post.findById(postId);
+    if (!post) {
+      const error: ErrorType = new Error("Could not find post.");
+      error.statusCode = 404;
+      throw error;
+    }
+    if (post.creator.toString() !== req?.userId?.toString()) {
+      const error: ErrorType = new Error(
+        "Only the creator can update the post."
+      );
+      error.statusCode = 403;
+      throw error;
+    }
+    // If the image URL has changed, delete the old image file
+    if (imageUrl !== post.imageUrl) {
+      clearImage(post.imageUrl);
+    }
 
-      if (post.creator.toString() !== req?.userId?.toString()) {
-        const error: ErrorType = new Error(
-          "Only the creator can update the post."
-        );
-        error.statusCode = 403;
-        throw error;
-      }
+    // Update the post's title, content, and image URL
+    post.title = title;
+    post.content = content;
+    post.imageUrl = imageUrl;
 
-      // If the image URL has changed, delete the old image file
-      if (imageUrl !== post.imageUrl) {
-        clearImage(post.imageUrl);
-      }
-
-      // Update the post's title, content, and image URL
-      post.title = title;
-      post.content = content;
-      post.imageUrl = imageUrl;
-
-      // Save the updated post to the database
-      return post.save();
-    })
-    .then((result) => {
-      // Respond with a success message and the updated post
-      res.status(200).json({ message: "Post updated!", post: result });
-    })
-    .catch((err: ErrorType) => {
-      // Set the status code to 500 if not already set and pass the error to the next middleware
-      if (!err.statusCode) {
-        err.statusCode = 500;
-      }
-      next(err);
-    });
+    // Save the updated post to the database
+    const updatedPost = await post.save();
+    // Respond with a success message and the updated post
+    res.status(200).json({ message: "Post updated!", post: updatedPost });
+  } catch (error) {
+    const err = error as ErrorType;
+    // Set the status code to 500 if not already set and pass the error to the next middleware
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
 };
 
-export const deletePost = (
+/**
+ * Deletes a post from the database.
+ * @function deletePost
+ * @param {Request & { userId?: string }} req - Express request object containing the postId parameter and optional userId.
+ * @param {Response} res - Express response object to send the response.
+ * @param {NextFunction} next - Express next middleware function for error handling.
+ * @returns {Promise<void>} - Returns a JSON response with a message.
+ * @throws {ErrorType} - Throws an error if the post or user is not found, or if an error occurs during the database query.
+ */
+
+export const deletePost = async (
   req: Request & { userId?: string },
   res: Response,
   next: NextFunction
@@ -269,46 +262,37 @@ export const deletePost = (
   // Retrieve the post ID from the request parameters
   const { postId } = req.params;
 
-  // Find the post by ID
-  Post.findById(postId)
-    .then((post) => {
-      // Check logged in user
-      if (!post) {
-        const error: ErrorType = new Error("Could not find post.");
-        error.statusCode = 404;
-        throw error;
-      }
-      if (post.creator.toString() !== req?.userId?.toString()) {
-        const error: ErrorType = new Error(
-          "Only the creator can update the post."
-        );
-        error.statusCode = 403;
-        throw error;
-      }
-      clearImage(post.imageUrl);
-      return Post.findByIdAndDelete(postId);
-    })
-    .then((result) => {
-      return User.findById(req.userId);
-    })
-    .then((user) => {
-      if (!user) {
-        const error: ErrorType = new Error("Could not find user.");
-        error.statusCode = 404;
-        throw error;
-      }
-
-      user.posts.pull(new Types.ObjectId(postId));
-      return user.save();
-    })
-    .then((result) => {
-      res.status(200).json({ message: "Deleted post." });
-    })
-    .catch((err: ErrorType) => {
-      // Set the status code to 500 if not already set and pass the error to the next middleware
-      if (!err.statusCode) {
-        err.statusCode = 500;
-      }
-      next(err);
-    });
+  try {
+    const post = await Post.findById(postId);
+    if (!post) {
+      const error: ErrorType = new Error("Could not find post.");
+      error.statusCode = 404;
+      throw error;
+    }
+    if (post.creator.toString() !== req?.userId?.toString()) {
+      const error: ErrorType = new Error(
+        "Only the creator can update the post."
+      );
+      error.statusCode = 403;
+      throw error;
+    }
+    clearImage(post.imageUrl);
+    await Post.findByIdAndDelete(postId);
+    const user = await User.findById(req.userId);
+    if (!user) {
+      const error: ErrorType = new Error("User not found");
+      error.statusCode = 404;
+      throw error;
+    }
+    user.posts.pull(new Types.ObjectId(postId));
+    await user.save();
+    res.status(200).json({ message: "Deleted post." });
+  } catch (error) {
+    const err = error as ErrorType;
+    // Set the status code to 500 if not already set and pass the error to the next middleware
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
 };

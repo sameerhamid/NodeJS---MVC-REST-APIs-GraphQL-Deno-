@@ -29,7 +29,7 @@ interface TokenType {
  * @param {NextFunction} next - Express next middleware function
  */
 
-const isAuth = (req: Request, _res: Response, next: NextFunction) => {
+const isAuth = async (req: Request, _res: Response, next: NextFunction) => {
   const authHeader = req.get("Authorization");
   if (!authHeader) {
     const error: ErrorType = new Error("Not authenticated.");
@@ -53,6 +53,8 @@ const isAuth = (req: Request, _res: Response, next: NextFunction) => {
     throw error;
   }
   const id = new mongoose.Types.ObjectId(decodedToken.userId);
+  const user = await User.findById(id);
+
   User.findById(id)
     .then((user) => {
       if (!user) {
