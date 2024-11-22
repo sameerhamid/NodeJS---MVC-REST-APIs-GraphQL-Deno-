@@ -53,7 +53,7 @@ const userSchema = new Schema<UserType>(
     // Status of the user
     status: {
       type: String,
-      required: true, // Status is required
+      defaule: "I am new!", // Status is required
     },
     // Posts created by the user
     posts: [
