@@ -4,6 +4,7 @@ import Post from "../models/post.model";
 import { ErrorType } from "../types/Error.type";
 import { clearImage } from "../utils/clearImage.util";
 import User, { UserType } from "../models/user.model";
+import { Types } from "mongoose";
 
 /**
  * Retrieves a list of posts from the database
@@ -272,7 +273,19 @@ export const deletePost = (
       return Post.findByIdAndDelete(postId);
     })
     .then((result) => {
-      console.log("Post deleted successfully", result);
+      return User.findById(req.userId);
+    })
+    .then((user) => {
+      if (!user) {
+        const error: ErrorType = new Error("Could not find user.");
+        error.statusCode = 404;
+        throw error;
+      }
+
+      user.posts.pull(new Types.ObjectId(postId));
+      return user.save();
+    })
+    .then((result) => {
       res.status(200).json({ message: "Deleted post." });
     })
     .catch((err: ErrorType) => {

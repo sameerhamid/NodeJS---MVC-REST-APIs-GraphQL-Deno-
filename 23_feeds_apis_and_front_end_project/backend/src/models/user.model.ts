@@ -1,4 +1,4 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema, Types } from "mongoose";
 import { PostType } from "./post.model";
 
 /**
@@ -29,7 +29,7 @@ export interface UserType {
   /**
    * The posts created by the user
    */
-  posts: PostType[];
+  posts: Types.Array<Types.ObjectId>;
 }
 
 // Define the schema for a user
