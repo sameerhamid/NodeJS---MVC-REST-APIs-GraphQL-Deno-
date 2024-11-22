@@ -121,7 +121,7 @@ app.use("/auth", authRoutes);
 // other middleware functions and routes and sends a JSON response
 // with the status code and error message
 app.use((error: ErrorType, req: Request, res: Response, next: NextFunction) => {
-  console.log(error);
+  console.log("error middleware", error);
   const status = error.statusCode || 500;
   const message = error.message;
   const data = error?.data ?? [];

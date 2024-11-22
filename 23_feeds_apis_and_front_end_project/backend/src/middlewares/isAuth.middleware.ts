@@ -1,6 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { ErrorType } from "../types/Error.type";
+import mongoose from "mongoose";
+import User from "../models/user.model";
 
 interface TokenType {
   email: string;
@@ -50,7 +52,22 @@ const isAuth = (req: Request, _res: Response, next: NextFunction) => {
     error.statusCode = 401;
     throw error;
   }
-  (req as Request & { userId: string }).userId;
+  const id = new mongoose.Types.ObjectId(decodedToken.userId);
+  User.findById(id)
+    .then((user) => {
+      if (!user) {
+        const error: ErrorType = new Error("Not authenticated.");
+        error.statusCode = 401;
+        next(error);
+      }
+    })
+    .catch((error) => {
+      const myError = error as ErrorType;
+      myError.statusCode = 401;
+      throw myError;
+    });
+
+  (req as Request & { userId: string }).userId = decodedToken.userId;
   next();
 };
 
