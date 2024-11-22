@@ -14,13 +14,25 @@ import { clearImage } from "../utils/clearImage.util";
  * @param {NextFunction} next - Express next middleware function
  */
 export const getPosts = (req: Request, res: Response, next: NextFunction) => {
-  // Retrieve all posts from the database
+  const currentPage = req.query.page ? +req.query.page : 1;
+  let perPage = 2;
+  let totalItems = 0;
   Post.find()
+    .countDocuments()
+    .then((numPosts) => {
+      totalItems = numPosts;
+      // Retrieve all posts from the database
+      return Post.find()
+        .skip((currentPage - 1) * perPage)
+        .limit(perPage);
+    })
     .then((posts) => {
       // Return the posts with a success message
-      res
-        .status(200)
-        .json({ message: "Fetch posts successfully.", posts: posts });
+      res.status(200).json({
+        message: "Fetch posts successfully.",
+        posts: posts,
+        totalItems,
+      });
     })
     .catch((err: ErrorType) => {
       // If an error occurs, set the status code to 500 and pass it to the next middleware
