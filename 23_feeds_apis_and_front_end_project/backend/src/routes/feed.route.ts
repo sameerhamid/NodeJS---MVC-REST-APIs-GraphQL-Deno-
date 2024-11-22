@@ -1,7 +1,12 @@
 import exrpess from "express";
 import { body } from "express-validator";
 
-import { createPost, getPost, getPosts } from "../controllers/feed.controller";
+import {
+  createPost,
+  getPost,
+  getPosts,
+  updatePost,
+} from "../controllers/feed.controller";
 
 const router = exrpess.Router();
 
@@ -35,5 +40,20 @@ router.post(
  *     summary: Get a single post
  */
 router.get("/post/:postId", getPost);
+
+/**
+ * @swagger
+ * /feed/post/{postId}:
+ *   put:
+ *     summary: Update a single post
+ */
+router.put(
+  "/post/:postId",
+  [
+    body("title").trim().isLength({ min: 5 }),
+    body("content").trim().isLength({ min: 5 }),
+  ],
+  updatePost
+);
 
 export default router;

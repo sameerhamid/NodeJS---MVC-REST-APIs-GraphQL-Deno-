@@ -1,3 +1,5 @@
+import fs from "fs";
+import path from "path";
 import e, { NextFunction, Request, Response } from "express";
 import { validationResult } from "express-validator";
 import Post from "../models/post.model";
@@ -40,7 +42,7 @@ export const createPost = (req: Request, res: Response, next: NextFunction) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     // Return an error response if the validation fails
-    const error: any = new Error(
+    const error: ErrorType = new Error(
       "Validation failed, entered data is incorrect."
     );
     error.statusCode = 422;
@@ -50,7 +52,7 @@ export const createPost = (req: Request, res: Response, next: NextFunction) => {
   // Check if a file was uploaded
   if (!req.file) {
     // If no file was uploaded, throw an error
-    const error: any = new Error("No image provided.");
+    const error: ErrorType = new Error("No image provided.");
     error.statusCode = 422;
     throw error;
   }
@@ -124,4 +126,97 @@ export const getPost = (req: Request, res: Response, next: NextFunction) => {
       // Pass the error to the next middleware function
       next(err);
     });
+};
+
+/**
+ * Updates a post in the database
+ * @function updatePost
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ * @param {NextFunction} next - Express next middleware function
+ * @returns {Promise<void>}
+ */
+export const updatePost = (req: Request, res: Response, next: NextFunction) => {
+  // Validate the input data
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    // Return an error response if the validation fails
+    const error: ErrorType = new Error(
+      "Validation failed, entered data is incorrect."
+    );
+    error.statusCode = 422;
+    throw error;
+  }
+
+  // Retrieve the post ID from the request parameters
+  const { postId } = req.params;
+
+  // Retrieve the title and content from the request body
+  const { title, content } = req.body;
+
+  // Retrieve the image URL from the request body
+  let imageUrl = req.body.image;
+
+  // If there is a file in the request, update the image URL
+  if (req.file) {
+    imageUrl = req.file.path;
+  }
+
+  // If there is no image URL, throw an error
+  if (!imageUrl) {
+    const error: ErrorType = new Error("No file picked.");
+    error.statusCode = 422;
+    throw error;
+  }
+
+  // Find the post by ID
+  Post.findById(postId)
+    .then((post) => {
+      // If the post is not found, throw a 404 error
+      if (!post) {
+        const error: ErrorType = new Error("Could not find post.");
+        error.statusCode = 404;
+        throw error;
+      }
+
+      // If the image URL has changed, delete the old image file
+      if (imageUrl !== post.imageUrl) {
+        clearImage(post.imageUrl);
+      }
+
+      // Update the post's title, content, and image URL
+      post.title = title;
+      post.content = content;
+      post.imageUrl = imageUrl;
+
+      // Save the updated post to the database
+      return post.save();
+    })
+    .then((result) => {
+      // Respond with a success message and the updated post
+      res.status(200).json({ message: "Post updated!", post: result });
+    })
+    .catch((err: ErrorType) => {
+      // Set the status code to 500 if not already set and pass the error to the next middleware
+      if (!err.statusCode) {
+        err.statusCode = 500;
+      }
+      next(err);
+    });
+};
+
+/**
+ * Deletes a file asynchronously and handles any errors
+ * @param {string} filePath - the path to the file to delete
+ */
+const clearImage = (filePath: string): void => {
+  // Construct the full file path
+  filePath = path.join(__dirname, "../..", filePath);
+
+  // Delete the file asynchronously and handle any errors
+  fs.unlink(filePath, (err) => {
+    if (err) {
+      console.error("Error deleting the file:", err);
+    }
+  });
 };
