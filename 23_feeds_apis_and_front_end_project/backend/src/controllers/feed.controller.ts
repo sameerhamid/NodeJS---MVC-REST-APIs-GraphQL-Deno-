@@ -5,6 +5,7 @@ import { validationResult } from "express-validator";
 import Post from "../models/post.model";
 import { ErrorType } from "../types/Error.type";
 import { clearImage } from "../utils/clearImage.util";
+import User, { UserType } from "../models/user.model";
 
 /**
  * Retrieves a list of posts from the database
@@ -50,7 +51,11 @@ export const getPosts = (req: Request, res: Response, next: NextFunction) => {
  * @param {Response} res - Express response object
  * @param {NextFunction} next - Express next middleware function
  */
-export const createPost = (req: Request, res: Response, next: NextFunction) => {
+export const createPost = (
+  req: Request & { userId?: string },
+  res: Response,
+  next: NextFunction
+) => {
   // Validate the input data
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -73,27 +78,38 @@ export const createPost = (req: Request, res: Response, next: NextFunction) => {
   // Store the path of the uploaded image in a variable
   const imageUrl = req.file.path;
   const { title, content } = req.body;
-
+  let creator: UserType;
   // Create a new post document
   const post = new Post({
     title,
     content,
     imageUrl: imageUrl,
-    creator: {
-      name: "sameer",
-    },
+    creator: req.userId,
+    posts: [],
   });
 
   // Save the post to the database
   post
     .save()
     .then((result) => {
-      // Log the result of creating the post
-      console.log("Created post>>>", result);
+      return User.findById(req.userId);
+    })
+    .then((user) => {
+      if (!user) {
+        const error: ErrorType = new Error("User not found");
+        error.statusCode = 404;
+        throw error;
+      }
+      creator = user;
+      user.posts.push(post);
+      return user.save();
+    })
+    .then((result) => {
       // Return a successful response with the created post
       res.status(201).json({
         message: "Post created successfully!",
-        post: result,
+        post: post,
+        creator: { _id: creator._id, name: creator.name, email: creator.email },
       });
     })
     .catch((err: ErrorType) => {

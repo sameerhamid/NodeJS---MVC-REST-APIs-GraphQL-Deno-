@@ -16,10 +16,6 @@ export interface PostType {
   creator: {
     /** Unique identifier for the creator */
     _id: string;
-    /** Name of the creator */
-    name: string;
-    /** Email of the creator */
-    email: string;
   };
   /** Date when the post was created */
   createdAt: string;
@@ -45,10 +41,8 @@ const postSchema = new Schema<PostType>(
     },
     // Creator of the post
     creator: {
-      type: Object, // Creator is an object containing creator details
-      // Uncomment the lines below if referencing a User model
-      // type: Schema.Types.ObjectId,
-      // ref: "User",
+      type: Schema.Types.ObjectId,
+      ref: "User",
       required: true, // Creator is required
     },
   },
