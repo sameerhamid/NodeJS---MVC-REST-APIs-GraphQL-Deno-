@@ -8,6 +8,7 @@ import {
   getPosts,
   updatePost,
 } from "../controllers/feed.controller";
+import isAuth from "../middlewares/isAuth.middleware";
 
 const router = exrpess.Router();
 
@@ -17,7 +18,7 @@ const router = exrpess.Router();
  *   get:
  *     summary: Get all posts
  */
-router.get("/posts", getPosts);
+router.get("/posts", isAuth, getPosts);
 
 /**
  * @swagger
