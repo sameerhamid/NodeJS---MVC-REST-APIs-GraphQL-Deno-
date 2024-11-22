@@ -13,34 +13,34 @@ import { Types } from "mongoose";
  * @param {Response} res - Express response object
  * @param {NextFunction} next - Express next middleware function
  */
-export const getPosts = (req: Request, res: Response, next: NextFunction) => {
+export const getPosts = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const currentPage = req.query.page ? +req.query.page : 1;
   let perPage = 2;
-  let totalItems = 0;
-  Post.find()
-    .countDocuments()
-    .then((numPosts) => {
-      totalItems = numPosts;
-      // Retrieve all posts from the database
-      return Post.find()
-        .skip((currentPage - 1) * perPage)
-        .limit(perPage);
-    })
-    .then((posts) => {
-      // Return the posts with a success message
-      res.status(200).json({
-        message: "Fetch posts successfully.",
-        posts: posts,
-        totalItems,
-      });
-    })
-    .catch((err: ErrorType) => {
-      // If an error occurs, set the status code to 500 and pass it to the next middleware
-      if (!err.statusCode) {
-        err.statusCode = 500;
-      }
-      next(err);
+
+  try {
+    const totalItems = (await Post.find().countDocuments()) ?? 0;
+    const posts = await Post.find()
+      .skip((currentPage - 1) * perPage)
+      .limit(perPage);
+
+    // Return the posts with a success message
+    res.status(200).json({
+      message: "Fetch posts successfully.",
+      posts: posts,
+      totalItems,
     });
+  } catch (error) {
+    const err = error as ErrorType;
+    // If an error occurs, set the status code to 500 and pass it to the next middleware
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
 };
 
 /**
