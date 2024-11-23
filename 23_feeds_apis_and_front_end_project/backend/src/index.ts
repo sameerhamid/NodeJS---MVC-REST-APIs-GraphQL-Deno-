@@ -3,6 +3,7 @@ import express, { NextFunction, Request, Response } from "express";
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import multer from "multer";
+import { Server } from "socket.io";
 import feedRoutes from "./routes/feed.route";
 import authRoutes from "./routes/auth.routes";
 import { ErrorType } from "./types/Error.type";
@@ -139,8 +140,20 @@ mongoose
     // Successfully connected to the MongoDB database
     console.log("Connected to MongoDB!");
     // Start the server and listen on the specified port
-    app.listen(PORT, () => {
+    const server = app.listen(PORT, () => {
       console.log("Server is running on port " + PORT);
+    });
+
+    const io = new Server(server, {
+      cors: {
+        origin: "*", // Allows connections from any origin
+      },
+    });
+    io.on("connection", (socket) => {
+      console.log("A user connected");
+      // socket.on("disconnect", () => {
+      //   console.log("A user disconnected");
+      // });
     });
   })
   .catch((err) => {
