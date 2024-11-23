@@ -23,23 +23,40 @@ class Feed extends Component {
   };
 
   componentDidMount() {
-    fetch("URL")
-      .then((res) => {
-        if (res.status !== 200) {
-          throw new Error("Failed to fetch user status.");
-        }
-        return res.json();
-      })
-      .then((resData) => {
-        this.setState({ status: resData.status });
-      })
-      .catch(this.catchError);
+    // fetch("URL")
+    //   .then((res) => {
+    //     if (res.status !== 200) {
+    //       throw new Error("Failed to fetch user status.");
+    //     }
+    //     return res.json();
+    //   })
+    //   .then((resData) => {
+    //     this.setState({ status: resData.status });
+    //   })
+    //   .catch(this.catchError);
 
     this.loadPosts();
 
+    // Establish a connection to the server using Socket.IO
+    // This connection is used to receive real-time updates
+    // from the server whenever a new post is created.
     openeSocket("http://localhost:8080");
   }
 
+  addPost = (post) => {
+    this.setState((prevState) => {
+      const updatedPosts = [...prevState.posts];
+      if (prevState.postPage === 1) {
+        updatedPosts.pop();
+        updatedPosts.unshift(post);
+      }
+
+      return {
+        posts: updatedPosts,
+        totalPosts: prevState.totalPosts + 1,
+      };
+    });
+  };
   loadPosts = (direction) => {
     if (direction) {
       this.setState({ postsLoading: true, posts: [] });
