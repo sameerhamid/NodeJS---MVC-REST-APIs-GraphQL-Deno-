@@ -3,10 +3,11 @@ import express, { NextFunction, Request, Response } from "express";
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import multer from "multer";
-import { Server } from "socket.io";
+
 import feedRoutes from "./routes/feed.route";
 import authRoutes from "./routes/auth.routes";
 import { ErrorType } from "./types/Error.type";
+import { SocketIoServer } from "./utils/socket";
 
 const app = express();
 
@@ -147,11 +148,9 @@ mongoose
     // Create a new instance of the Server class from the Socket.IO library
     // This instance is configured to allow connections from any origin
     // The server instance is the Express.js server that we created earlier
-    const io = new Server(server, {
-      cors: {
-        origin: "*", // Allows connections from any origin
-      },
-    });
+    // Initialize the Socket.IO server
+    const io = SocketIoServer.init(server);
+
     io.on("connection", (socket) => {
       console.log("A user connected");
       // socket.on("disconnect", () => {
