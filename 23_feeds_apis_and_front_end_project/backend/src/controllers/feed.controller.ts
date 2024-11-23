@@ -27,6 +27,7 @@ export const getPosts = async (
   try {
     const totalItems = (await Post.find().countDocuments()) ?? 0;
     const posts = await Post.find()
+      .populate("creator")
       .skip((currentPage - 1) * perPage)
       .limit(perPage);
 
@@ -102,11 +103,14 @@ export const createPost = async (
       throw error;
     }
     user.posts.push(newPost);
-
+    const postObject = post.toObject();
     await user.save();
     SocketIoServer.getIo().emit("posts", {
       action: "create",
-      post,
+      post: {
+        ...postObject,
+        creator: { _id: user._id, name: user.name, email: user.email },
+      },
     });
     res.status(201).json({
       message: "Post created successfully!",
