@@ -23,24 +23,30 @@ class Feed extends Component {
   };
 
   componentDidMount() {
-    // fetch("URL")
-    //   .then((res) => {
-    //     if (res.status !== 200) {
-    //       throw new Error("Failed to fetch user status.");
-    //     }
-    //     return res.json();
-    //   })
-    //   .then((resData) => {
-    //     this.setState({ status: resData.status });
-    //   })
-    //   .catch(this.catchError);
+    fetch("URL")
+      .then((res) => {
+        if (res.status !== 200) {
+          throw new Error("Failed to fetch user status.");
+        }
+        return res.json();
+      })
+      .then((resData) => {
+        this.setState({ status: resData.status });
+      })
+      .catch(this.catchError);
 
     this.loadPosts();
 
     // Establish a connection to the server using Socket.IO
     // This connection is used to receive real-time updates
     // from the server whenever a new post is created.
-    openeSocket("http://localhost:8080");
+    const socket = openeSocket("http://localhost:8080");
+    socket.on("posts", (data) => {
+      if (data.action === "create") {
+        this.addPost(data.post);
+        console.log("post", data.post);
+      }
+    });
   }
 
   addPost = (post) => {
@@ -139,6 +145,8 @@ class Feed extends Component {
     formData.append("content", postData.content);
     formData.append("image", postData.image);
 
+    console.log("formData>>>", formData, postData);
+
     let url = "http://localhost:8080/feed/post";
     let method = "POST";
     if (this.state.editPost) {
@@ -175,8 +183,6 @@ class Feed extends Component {
               (p) => p._id === prevState.editPost._id
             );
             updatedPosts[postIndex] = post;
-          } else if (prevState.posts.length < 2) {
-            updatedPosts = prevState.posts.concat(post);
           }
           return {
             posts: updatedPosts,

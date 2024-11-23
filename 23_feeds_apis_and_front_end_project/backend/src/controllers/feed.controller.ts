@@ -5,6 +5,7 @@ import { ErrorType } from "../types/Error.type";
 import { clearImage } from "../utils/clearImage.util";
 import User, { UserType } from "../models/user.model";
 import { Types } from "mongoose";
+import { SocketIoServer } from "../utils/socket";
 
 /**
  * Retrieves a paginated list of posts from the database.
@@ -58,6 +59,7 @@ export const createPost = async (
   res: Response,
   next: NextFunction
 ) => {
+  console.log(req.body, req.file);
   // Validate the input data
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -71,6 +73,7 @@ export const createPost = async (
 
   // Check if a file was uploaded
   if (!req.file) {
+    console.log(req.file);
     // If no file was uploaded, throw an error
     const error: ErrorType = new Error("No image provided.");
     error.statusCode = 422;
@@ -101,6 +104,10 @@ export const createPost = async (
     user.posts.push(newPost);
 
     await user.save();
+    SocketIoServer.getIo().emit("posts", {
+      action: "create",
+      post,
+    });
     res.status(201).json({
       message: "Post created successfully!",
       post: newPost,
