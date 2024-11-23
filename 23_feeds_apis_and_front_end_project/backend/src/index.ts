@@ -144,6 +144,9 @@ mongoose
       console.log("Server is running on port " + PORT);
     });
 
+    // Create a new instance of the Server class from the Socket.IO library
+    // This instance is configured to allow connections from any origin
+    // The server instance is the Express.js server that we created earlier
     const io = new Server(server, {
       cors: {
         origin: "*", // Allows connections from any origin
