@@ -218,13 +218,13 @@ export const updatePost = async (
   }
 
   try {
-    const post = await Post.findById(postId);
+    const post = await Post.findById(postId).populate("creator");
     if (!post) {
       const error: ErrorType = new Error("Could not find post.");
       error.statusCode = 404;
       throw error;
     }
-    if (post.creator.toString() !== req?.userId?.toString()) {
+    if (post.creator._id.toString() !== req?.userId?.toString()) {
       const error: ErrorType = new Error(
         "Only the creator can update the post."
       );
@@ -243,6 +243,10 @@ export const updatePost = async (
 
     // Save the updated post to the database
     const updatedPost = await post.save();
+    SocketIoServer.getIo().emit("posts", {
+      action: "update",
+      post: post,
+    });
     // Respond with a success message and the updated post
     res.status(200).json({ message: "Post updated!", post: updatedPost });
   } catch (error) {
