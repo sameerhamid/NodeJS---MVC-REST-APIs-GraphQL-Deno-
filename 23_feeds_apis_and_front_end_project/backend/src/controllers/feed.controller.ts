@@ -302,6 +302,10 @@ export const deletePost = async (
     }
     user.posts.pull(new Types.ObjectId(postId));
     await user.save();
+    SocketIoServer.getIo().emit("posts", {
+      action: "delete",
+      post: postId,
+    });
     res.status(200).json({ message: "Deleted post." });
   } catch (error) {
     const err = error as ErrorType;
