@@ -116,6 +116,13 @@ app.use(
     schema: graphlSchema,
     rootValue: graphlResolver,
     graphiql: true,
+    customFormatErrorFn: (error) => {
+      if (!error.originalError) {
+        return error;
+      }
+      const data = error.originalError;
+      return data;
+    },
   })
 );
 

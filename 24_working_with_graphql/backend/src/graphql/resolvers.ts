@@ -3,6 +3,11 @@ import validator from "validator";
 import User from "../models/user.model";
 import { ErrorType } from "../types/Error.type";
 import { processBcrypt } from "../utils/encryption.util";
+import { ValidationError } from "express-validator";
+
+export type ErrorMsgType = {
+  message: string;
+};
 
 interface UserInputData {
   email: string;
@@ -23,7 +28,7 @@ const resolvers = {
     req: Request
   ) => {
     const { email, password, name } = userInput;
-    const errors: ErrorType[] = [];
+    const errors: ErrorMsgType[] = [];
 
     if (!validator.isEmail(email)) {
       errors.push({
@@ -40,7 +45,9 @@ const resolvers = {
     }
 
     if (errors.length > 0) {
-      const newError = new Error("Invalid input");
+      const newError: ErrorType = new Error("Invalid input");
+      newError.data = errors;
+      newError.statusCode = 422;
       throw newError;
     }
     const existingUser = await User.findOne({ email: email });
