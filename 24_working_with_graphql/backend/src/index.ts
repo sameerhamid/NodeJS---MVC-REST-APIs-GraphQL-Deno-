@@ -6,6 +6,7 @@ import multer from "multer";
 import { graphqlHTTP } from "express-graphql";
 import graphlSchema from "./graphql/schema";
 import graphlResolver from "./graphql/resolvers";
+import isAuth from "./middlewares/isAuth.middleware";
 
 import { ErrorType } from "./types/Error.type";
 import { SocketIoServer } from "./utils/socket";
@@ -116,6 +117,8 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     next(); // Ensure next() is always called if not OPTIONS
   }
 });
+
+app.use(isAuth);
 
 app.use(
   "/graphql",

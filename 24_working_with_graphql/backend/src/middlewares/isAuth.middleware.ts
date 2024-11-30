@@ -29,12 +29,59 @@ interface TokenType {
  * @param {NextFunction} next - Express next middleware function
  */
 
-const isAuth = async (req: Request, _res: Response, next: NextFunction) => {
+// const isAuth = async (req: Request, _res: Response, next: NextFunction) => {
+//   const authHeader = req.get("Authorization");
+//   if (!authHeader) {
+//     const error: ErrorType = new Error("Not authenticated.");
+//     error.statusCode = 401;
+//     throw error;
+//   }
+//   const token = authHeader?.split(" ")[1] as string;
+
+//   let decodedToken;
+//   try {
+//     decodedToken = jwt.verify(token, "secret") as TokenType;
+//   } catch (error) {
+//     const myError = error as ErrorType;
+//     myError.statusCode = 401;
+//     throw myError;
+//   }
+
+//   if (!decodedToken) {
+//     const error: ErrorType = new Error("Not authenticated.");
+//     error.statusCode = 401;
+//     throw error;
+//   }
+//   const id = new mongoose.Types.ObjectId(decodedToken.userId);
+//   const user = await User.findById(id);
+
+//   User.findById(id)
+//     .then((user) => {
+//       if (!user) {
+//         const error: ErrorType = new Error("Not authenticated.");
+//         error.statusCode = 401;
+//         next(error);
+//       }
+//     })
+//     .catch((error) => {
+//       const myError = error as ErrorType;
+//       myError.statusCode = 401;
+//       throw myError;
+//     });
+
+//   (req as Request & { userId: string }).userId = decodedToken.userId;
+//   next();
+// };
+
+const isAuth = async (
+  req: Request & { isAuth?: boolean; userId?: string },
+  _res: Response,
+  next: NextFunction
+) => {
   const authHeader = req.get("Authorization");
   if (!authHeader) {
-    const error: ErrorType = new Error("Not authenticated.");
-    error.statusCode = 401;
-    throw error;
+    req.isAuth = false;
+    return next();
   }
   const token = authHeader?.split(" ")[1] as string;
 
@@ -42,34 +89,31 @@ const isAuth = async (req: Request, _res: Response, next: NextFunction) => {
   try {
     decodedToken = jwt.verify(token, "secret") as TokenType;
   } catch (error) {
-    const myError = error as ErrorType;
-    myError.statusCode = 401;
-    throw myError;
+    req.isAuth = false;
+    return next();
   }
 
   if (!decodedToken) {
-    const error: ErrorType = new Error("Not authenticated.");
-    error.statusCode = 401;
-    throw error;
+    req.isAuth = false;
+    return next();
   }
-  const id = new mongoose.Types.ObjectId(decodedToken.userId);
-  const user = await User.findById(id);
+  // const id = new mongoose.Types.ObjectId(decodedToken.userId);
+  // const user = await User.findById(id);
 
-  User.findById(id)
-    .then((user) => {
-      if (!user) {
-        const error: ErrorType = new Error("Not authenticated.");
-        error.statusCode = 401;
-        next(error);
-      }
-    })
-    .catch((error) => {
-      const myError = error as ErrorType;
-      myError.statusCode = 401;
-      throw myError;
-    });
+  // User.findById(id)
+  //   .then((user) => {
+  //     if (!user) {
+  //       req.isAuth = false;
+  //     }
+  //   })
+  //   .catch((error) => {
+  //     req.isAuth = false;
+  //   });
 
-  (req as Request & { userId: string }).userId = decodedToken.userId;
+  // (req as Request & { userId: string }).userId = decodedToken.userId;
+
+  req.userId = decodedToken.userId;
+  req.isAuth = true;
   next();
 };
 

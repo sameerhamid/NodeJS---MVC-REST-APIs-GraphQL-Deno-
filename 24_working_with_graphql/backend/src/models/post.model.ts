@@ -20,6 +20,7 @@ export interface PostType {
   };
   /** Date when the post was created */
   createdAt: string;
+  updatedAt: string;
 }
 
 // Define the schema for a post
