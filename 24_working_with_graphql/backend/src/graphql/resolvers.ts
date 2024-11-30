@@ -1,5 +1,6 @@
 import { Request } from "express";
 import validator from "validator";
+import jwt from "jsonwebtoken";
 import User from "../models/user.model";
 import { ErrorType } from "../types/Error.type";
 import { processBcrypt } from "../utils/encryption.util";
@@ -22,7 +23,15 @@ interface UserInputData {
  * @throws {ErrorType} - If the user already exists
  */
 const resolvers = {
-  createUser: async (
+  /*************  ✨ Codeium Command ⭐  *************/
+  /**
+   * Creates a new user
+   * @param userInput - The user input data
+   * @param req - The express request object
+   * @returns The created user data
+   * @throws {ErrorType} - If the user already exists
+   */
+  /******  8e2417e8-965b-43ff-abfe-89cb01f03ae0  *******/ createUser: async (
     { userInput }: { userInput: UserInputData },
     req: Request
   ) => {
@@ -70,6 +79,50 @@ const resolvers = {
     return {
       ...createdUserData,
       _id: createdUserData._id.toString(),
+    };
+  },
+
+  login: async (
+    { email, password }: { email: string; password: string },
+    req: Request
+  ) => {
+    const existingUser = await User.findOne({ email: email });
+    const errors: ErrorMsgType[] = [];
+    if (!existingUser) {
+      errors.push({ message: "User doesn't exist" });
+    }
+
+    const isEqualPass = await processBcrypt(
+      "verify",
+      password,
+      existingUser?.password ?? ""
+    );
+
+    if (!isEqualPass) {
+      errors.push({ message: "Password is incorrect" });
+    }
+
+    if (errors.length > 0) {
+      const newError: ErrorType = new Error("Invalid input");
+      newError.data = errors;
+      newError.statusCode = 422;
+      throw newError;
+    }
+
+    const token = jwt.sign(
+      {
+        userId: existingUser?._id.toString(),
+        email: existingUser?.email,
+      },
+      "secret",
+      {
+        expiresIn: "1h",
+      }
+    );
+
+    return {
+      token,
+      userId: existingUser?._id.toString(),
     };
   },
 };

@@ -100,17 +100,21 @@ app.use(
  * @param {Response} res - Express response object
  * @param {NextFunction} next - Express next middleware function
  */
-app.use((req, res, next) => {
+// CORS Middleware
+// CORS Middleware
+app.use((req: Request, res: Response, next: NextFunction) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
     "Access-Control-Allow-Methods",
-    "GET, POST , PATCH, DELETE , PUT"
+    "GET, POST, PATCH, DELETE, PUT"
   );
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
   if (req.method === "OPTIONS") {
-    res.status(200).end();
+    res.status(200).send(); // Properly terminate the response
+  } else {
+    next(); // Ensure next() is always called if not OPTIONS
   }
-  next();
 });
 
 app.use(

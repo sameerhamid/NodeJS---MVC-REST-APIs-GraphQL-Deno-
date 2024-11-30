@@ -20,6 +20,11 @@ const Schema = buildSchema(`
     posts: [Post!]! 
   }
 
+  type AuthData{
+  token:String!
+  userId:String!
+  }
+
   input UserInputData {
     email: String!
     password: String!
@@ -31,7 +36,7 @@ const Schema = buildSchema(`
   }
 
   type RootQuery {
-    hello: String
+    login(email: String!, password: String!): AuthData!
   }
 
   schema {

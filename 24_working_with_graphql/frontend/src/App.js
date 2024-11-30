@@ -150,30 +150,31 @@ class App extends Component {
   signupHandler = (event, authData) => {
     event.preventDefault();
     this.setState({ authLoading: true });
-    const graphqlQuery = {
-      query: `
-      mutation{
-      createUser(userInput:{email:"${authData.signupForm.email.value}",password:"${authData.signupForm.password.value}",name:"${authData.signupForm.name.value}"}){
-        _id
-        email
-        }
-      }
-      `,
-    };
+
+    const graphqlQuery = `
+ mutation{
+  createUser(userInput:{email:"${authData.signupForm.email.value}",password:"${authData.signupForm.password.value}",name:"${authData.signupForm.name.value}"}){
+    _id
+    email
+    password
+  }
+}
+`;
     fetch("http://localhost:8080/graphql", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        graphqlQuery,
+        query: graphqlQuery,
       }),
     })
       .then((res) => {
-        if (res.status !== 200 && res.status !== 201) {
-          console.log("Error!");
-          throw new Error("Creating a user failed!");
-        }
+        console.log("response>>>", res);
+        // if (res.status !== 200 && res.status !== 201) {
+        //   console.log("Error!");
+        //   throw new Error("Creating a user failed!");
+        // }
         return res.json();
       })
       .then((resData) => {
