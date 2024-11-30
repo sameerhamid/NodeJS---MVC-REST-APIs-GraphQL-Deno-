@@ -110,6 +110,66 @@ class Feed extends Component {
     this.setState({ isEditing: false, editPost: null });
   };
 
+  // finishEditHandler = (postData) => {
+  //   this.setState({
+  //     editLoading: true,
+  //   });
+
+  //   const formData = new FormData();
+  //   formData.append("title", postData.title);
+  //   formData.append("content", postData.content);
+  //   formData.append("image", postData.image);
+
+  //   console.log("formData>>>", formData, postData);
+
+  //   let url = "http://localhost:8080/feed/post";
+  //   let method = "POST";
+  //   if (this.state.editPost) {
+  //     url = `http://localhost:8080/feed/post/${this.state.editPost._id}`;
+  //     method = "PUT";
+  //   }
+
+  //   fetch(url, {
+  //     method: method,
+  //     body: formData,
+  //     headers: {
+  //       Authorization: "Bearer " + this.props.token,
+  //     },
+  //   })
+  //     .then((res) => {
+  //       if (res.status !== 200 && res.status !== 201) {
+  //         throw new Error("Creating or editing a post failed!");
+  //       }
+  //       return res.json();
+  //     })
+  //     .then((resData) => {
+  //       console.log(resData);
+  //       const post = {
+  //         _id: resData.post._id,
+  //         title: resData.post.title,
+  //         content: resData.post.content,
+  //         creator: resData.post.creator,
+  //         createdAt: resData.post.createdAt,
+  //       };
+  //       this.setState((prevState) => {
+  //         return {
+  //           isEditing: false,
+  //           editPost: null,
+  //           editLoading: false,
+  //         };
+  //       });
+  //     })
+  //     .catch((err) => {
+  //       console.log(err);
+  //       this.setState({
+  //         isEditing: false,
+  //         editPost: null,
+  //         editLoading: false,
+  //         error: err,
+  //       });
+  //     });
+  // };
+
   finishEditHandler = (postData) => {
     this.setState({
       editLoading: true,
@@ -122,24 +182,34 @@ class Feed extends Component {
 
     console.log("formData>>>", formData, postData);
 
-    let url = "http://localhost:8080/feed/post";
-    let method = "POST";
-    if (this.state.editPost) {
-      url = `http://localhost:8080/feed/post/${this.state.editPost._id}`;
-      method = "PUT";
-    }
+    let graphqlQuery = `
+      mutation {
+        createPost(postInput:{
+          title:"${postData.title}",
+          content:"${postData.content}",
+          imageUrl:"https://images.pexels.com/photos/1566308/pexels-photo-1566308.jpeg?cs=srgb&dl=pexels-jbigallery-1566308.jpg&fm=jpg"
+        }) {
+          _id
+          title
+          content
+          imageUrl
+          creator {
+            name
+          }
+      
+        }
+      }
+      `;
 
-    fetch(url, {
-      method: method,
-      body: formData,
+    fetch("http://localhost:8080/graphql", {
+      method: "POST",
+      body: JSON.stringify({ query: graphqlQuery }),
       headers: {
         Authorization: "Bearer " + this.props.token,
+        "Content-Type": "application/json",
       },
     })
       .then((res) => {
-        if (res.status !== 200 && res.status !== 201) {
-          throw new Error("Creating or editing a post failed!");
-        }
         return res.json();
       })
       .then((resData) => {

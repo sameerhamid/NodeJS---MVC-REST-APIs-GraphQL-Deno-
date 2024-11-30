@@ -192,6 +192,8 @@ const resolvers = {
     const createdPost = await post.save();
     user?.posts.push(createdPost);
 
+    await user?.save();
+
     const createdPostData = createdPost.toObject();
     // Add post to user
     return {
@@ -199,6 +201,10 @@ const resolvers = {
       _id: createdPostData._id.toString(),
       createdAt: createdPostData.createdAt.toString(),
       updatedAt: createdPostData.updatedAt.toString(),
+      creator: {
+        ...createdPostData.creator,
+        _id: createdPostData.creator._id.toString(),
+      },
     };
   },
 };

@@ -184,6 +184,19 @@ class App extends Component {
         if (resData.errors) {
           throw new Error("User Login failed!");
         }
+        if (
+          resData.errors &&
+          resData.errors.length > 0 &&
+          resData.errors[0].status === 422
+        ) {
+          throw new Error(
+            "Validation failed. Make sure the email address isn't used yet!"
+          );
+        }
+
+        if (resData.errors) {
+          throw new Error("User Login failed!");
+        }
         console.log(resData);
         this.setState({
           isAuth: true,
