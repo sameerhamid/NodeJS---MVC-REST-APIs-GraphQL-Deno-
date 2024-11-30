@@ -3,7 +3,6 @@ import validator from "validator";
 import User from "../models/user.model";
 import { ErrorType } from "../types/Error.type";
 import { processBcrypt } from "../utils/encryption.util";
-import { ValidationError } from "express-validator";
 
 export type ErrorMsgType = {
   message: string;
@@ -44,16 +43,18 @@ const resolvers = {
       });
     }
 
+    const existingUser = await User.findOne({ email: email });
+    if (existingUser) {
+      errors.push({
+        message: "User already exists",
+      });
+    }
+
     if (errors.length > 0) {
       const newError: ErrorType = new Error("Invalid input");
       newError.data = errors;
       newError.statusCode = 422;
       throw newError;
-    }
-    const existingUser = await User.findOne({ email: email });
-    if (existingUser) {
-      const error: ErrorType = new Error("User already exists");
-      throw error;
     }
 
     const hashedPass = await processBcrypt("hash", password);

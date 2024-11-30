@@ -96,17 +96,20 @@ app.use(
 /**
  * Middleware to set CORS headers for all incoming requests
  * @function
- * @param {Request} _req - Express request object (unused)
+ * @param {Request} req - Express request object (unused)
  * @param {Response} res - Express response object
  * @param {NextFunction} next - Express next middleware function
  */
-app.use((_req, res, next) => {
+app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
     "Access-Control-Allow-Methods",
     "GET, POST , PATCH, DELETE , PUT"
   );
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  if (req.method === "OPTIONS") {
+    res.status(200).end();
+  }
   next();
 });
 
