@@ -141,6 +141,14 @@ const resolvers = {
     };
   },
 
+  /**
+   * Creates a new post in the database.
+   * @function createPost
+   * @param {Object} postInput - Contains the post data including title, content, and imageUrl.
+   * @param {Request & { isAuth?: boolean; userId?: string }} req - Express request object with authentication status and userId.
+   * @returns {Promise<Object>} - Returns a promise that resolves to the created post data with timestamps and creator info.
+   * @throws {ErrorType} - If validation fails or if the user is not authenticated or invalid.
+   */
   createPost: async (
     { postInput }: { postInput: PostInputData },
     req: Request & { isAuth?: boolean; userId?: string }
@@ -205,6 +213,51 @@ const resolvers = {
         ...createdPostData.creator,
         _id: createdPostData.creator._id.toString(),
       },
+    };
+  },
+
+  /**
+   * Get all posts
+   * @param _args - unused
+   * @param req - request object
+   * @returns an object with a posts array and a totalPosts number
+   * @throws an error if the user is not authenticated
+   */
+  posts: async (_args: any, req: Request & { isAuth?: boolean }) => {
+    const errors: ErrorMsgType[] = [];
+    console.log("isAuth", req.isAuth);
+    if (!req.isAuth) {
+      errors.push({ message: "Not authenticated" });
+    }
+
+    if (errors.length > 0) {
+      const newError: ErrorType = new Error("Invalid input");
+      newError.data = errors;
+      newError.statusCode = 422;
+      throw newError;
+    }
+    const totalPosts = await Post.find().countDocuments();
+    const posts = await Post.find()
+      .sort({ createdAt: -1 })
+      .populate("creator")
+      .skip(0)
+      .limit(2);
+
+    return {
+      posts: posts.map((post) => {
+        const createdPostData = post.toObject();
+        return {
+          ...createdPostData,
+          _id: createdPostData._id.toString(),
+          createdAt: createdPostData.createdAt.toString(),
+          updatedAt: createdPostData.updatedAt.toString(),
+          creator: {
+            ...createdPostData.creator,
+            _id: createdPostData.creator._id.toString(),
+          },
+        };
+      }),
+      totalPosts: totalPosts ?? 0,
     };
   },
 };

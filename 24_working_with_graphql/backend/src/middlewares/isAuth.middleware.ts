@@ -79,6 +79,7 @@ const isAuth = async (
   next: NextFunction
 ) => {
   const authHeader = req.get("Authorization");
+
   if (!authHeader) {
     req.isAuth = false;
     return next();
