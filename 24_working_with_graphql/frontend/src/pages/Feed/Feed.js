@@ -203,18 +203,33 @@ class Feed extends Component {
     });
 
     const formData = new FormData();
-    formData.append("title", postData.title);
-    formData.append("content", postData.content);
     formData.append("image", postData.image);
+    if (this.state.editPost) {
+      formData.append("oldPath", this.state.editPost.imagePath);
+    }
 
-    console.log("formData>>>", formData, postData);
-
-    let graphqlQuery = `
+    console.log("formData>>>", formData);
+    fetch("http://localhost:8080/post-image", {
+      method: "PUT",
+      headers: {
+        Authorization: "Bearer " + this.props.token,
+      },
+      body: formData,
+    })
+      .then((res) => {
+        if (res.status !== 200 && res.status !== 201) {
+          throw new Error("Creating or editing a post failed!");
+        }
+        return res.json();
+      })
+      .then((resData) => {
+        const imageUrl = resData.filePath;
+        let graphqlQuery = `
       mutation {
         createPost(postInput:{
           title:"${postData.title}",
           content:"${postData.content}",
-          imageUrl:"https://images.pexels.com/photos/1566308/pexels-photo-1566308.jpeg?cs=srgb&dl=pexels-jbigallery-1566308.jpg&fm=jpg"
+          imageUrl:"${imageUrl}"
         }) {
           _id
           title
@@ -228,14 +243,15 @@ class Feed extends Component {
       }
       `;
 
-    fetch("http://localhost:8080/graphql", {
-      method: "POST",
-      body: JSON.stringify({ query: graphqlQuery }),
-      headers: {
-        Authorization: "Bearer " + this.props.token,
-        "Content-Type": "application/json",
-      },
-    })
+        return fetch("http://localhost:8080/graphql", {
+          method: "POST",
+          body: JSON.stringify({ query: graphqlQuery }),
+          headers: {
+            Authorization: "Bearer " + this.props.token,
+            "Content-Type": "application/json",
+          },
+        });
+      })
       .then((res) => {
         return res.json();
       })
@@ -258,6 +274,7 @@ class Feed extends Component {
           _id: resData.data.createPost._id,
           title: resData.data.createPost.title,
           content: resData.data.createPost.content,
+          imagePath: resData.data.createPost.imageUrl,
           creator: resData.data.createPost.creator,
           createdAt: resData.data.createPost.createdAt,
         };

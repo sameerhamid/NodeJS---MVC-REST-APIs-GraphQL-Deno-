@@ -10,6 +10,7 @@ import isAuth from "./middlewares/isAuth.middleware";
 
 import { ErrorType } from "./types/Error.type";
 import { SocketIoServer } from "./utils/socket";
+import { clearImage } from "./utils/clearImage.util";
 
 const app = express();
 
@@ -119,6 +120,22 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 app.use(isAuth);
+
+// Route handler for updating an image
+app.put("/post-image", (req: any, res: any, next: any) => {
+  if (req.isAuth === false) {
+    throw new Error("Not authenticated!");
+  }
+  if (!req.file) {
+    return res.status(200).json({ message: "No file provided!" });
+  }
+  if (req.body.oldPath) {
+    clearImage(req.body.oldPath);
+  }
+  return res
+    .status(200)
+    .json({ message: "File stored.", filePath: req.file.path });
+});
 
 app.use(
   "/graphql",
