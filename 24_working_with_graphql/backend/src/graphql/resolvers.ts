@@ -300,6 +300,71 @@ const resolvers = {
       updatedAt: postData?.updatedAt.toString(),
     };
   },
+
+  updatePost: async (
+    { id, postInput }: { id: string; postInput: PostInputData },
+    req: Request & { isAuth?: boolean; userId?: string }
+  ) => {
+    const errors: ErrorMsgType[] = [];
+    if (!req.isAuth) {
+      errors.push({ message: "Not authenticated" });
+    }
+
+    const post = await Post.findById(id).populate("creator");
+    if (!post || post === null) {
+      errors.push({ message: "Post not found" });
+    }
+
+    if (post?.creator._id.toString() !== req.userId) {
+      errors.push({ message: "Not authorized" });
+    }
+
+    if (
+      validator.isEmpty(postInput.title) ||
+      !validator.isLength(postInput.title, { min: 5 })
+    ) {
+      errors.push({ message: "Title is invalid." });
+    }
+
+    if (
+      validator.isEmpty(postInput.content) ||
+      !validator.isLength(postInput.content, { min: 5 })
+    ) {
+      errors.push({ message: "Content is invalid." });
+    }
+
+    if (
+      validator.isEmpty(postInput.imageUrl) ||
+      !validator.isLength(postInput.imageUrl, { min: 5 })
+    ) {
+      errors.push({ message: "Image URL is invalid." });
+    }
+
+    if (errors.length > 0) {
+      const newError: ErrorType = new Error("Invalid input");
+      newError.data = errors;
+      newError.statusCode = 422;
+      throw newError;
+    }
+    post!.title = postInput.title;
+    post!.content = postInput.content;
+    if (postInput.imageUrl !== "undefined") {
+      post!.imageUrl = postInput.imageUrl;
+    }
+
+    const updatedPost = await post!.save();
+    const createdPostData = updatedPost.toObject();
+    return {
+      ...createdPostData,
+      _id: createdPostData._id.toString(),
+      createdAt: createdPostData.createdAt.toString(),
+      updatedAt: createdPostData.updatedAt.toString(),
+      creator: {
+        ...createdPostData.creator,
+        _id: createdPostData.creator._id.toString(),
+      },
+    };
+  },
 };
 
 export default resolvers;

@@ -7,7 +7,7 @@ import path from "path";
  */
 export const clearImage = (filePath: string): void => {
   // Construct the full file path
-  filePath = path.join(__dirname, "../..", filePath);
+  filePath = path.join(__dirname, "../../", filePath);
 
   // Delete the file asynchronously and handle any errors
   fs.unlink(filePath, (err) => {
