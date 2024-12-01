@@ -265,6 +265,41 @@ const resolvers = {
       totalPosts: totalPosts ?? 0,
     };
   },
+
+  /**
+   * Get a single post by id
+   * @param {string} id - The id of the post to get
+   * @param {Request & { isAuth?: boolean; userId?: string }} req - The express request object
+   * @returns {Promise<Object>} - The post data with the id, title, content, imageUrl, createdAt, and updatedAt.
+   * @throws {ErrorType} - If the post is not found or if the user is not authenticated.
+   */
+  post: async (
+    { id }: { id: string },
+    req: Request & { isAuth?: boolean; userId?: string }
+  ) => {
+    const errors: ErrorMsgType[] = [];
+    if (!req.isAuth) {
+      errors.push({ message: "Not authenticated" });
+    }
+
+    const post = await Post.findById(id).populate("creator");
+    if (!post) {
+      errors.push({ message: "Post not found" });
+    }
+    if (errors.length > 0) {
+      const newError: ErrorType = new Error("Invalid input");
+      newError.data = errors;
+      newError.statusCode = 422;
+      throw newError;
+    }
+    const postData = post?.toObject();
+    return {
+      ...postData,
+      _id: postData?._id.toString(),
+      createdAt: postData?.createdAt.toString(),
+      updatedAt: postData?.updatedAt.toString(),
+    };
+  },
 };
 
 export default resolvers;
