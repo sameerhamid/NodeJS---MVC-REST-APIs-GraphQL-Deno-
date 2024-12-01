@@ -70,8 +70,8 @@ class Feed extends Component {
     console.log(page);
     const graphqlQuery = {
       query: `
-        {
-  posts(page:${page}) {
+       query FetchPosts($page: Int!) {
+  posts(page:$page) {
     posts {
       _id
       title
@@ -89,6 +89,9 @@ class Feed extends Component {
   }
 }
       `,
+      variables: {
+        page: page,
+      },
     };
 
     fetch("http://localhost:8080/graphql", {
@@ -125,11 +128,14 @@ class Feed extends Component {
     fetch("http://localhost:8080/graphql", {
       method: "POST",
       body: JSON.stringify({
-        query: `mutation{
-          updateStatus(status:"${this.state.status}"){
+        query: `mutation UpdateUserStatus($status:String!){
+          updateStatus(status:$status){
             status
           }
         }`,
+        variables: {
+          status: this.state.status,
+        },
       }),
       headers: {
         Authorization: "Bearer " + this.props.token,
@@ -253,7 +259,7 @@ class Feed extends Component {
         return res.json();
       })
       .then((resData) => {
-        const imageUrl = resData.filePath;
+        const imageUrl = resData.filePath || "undefined";
         let graphqlQuery = `
       mutation {
         createPost(postInput:{
