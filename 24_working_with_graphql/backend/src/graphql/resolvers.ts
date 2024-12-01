@@ -5,6 +5,7 @@ import User from "../models/user.model";
 import Post from "../models/post.model";
 import { ErrorType } from "../types/Error.type";
 import { processBcrypt } from "../utils/encryption.util";
+import { clearImage } from "../utils/clearImage.util";
 
 export type ErrorMsgType = {
   message: string;
@@ -242,6 +243,7 @@ const resolvers = {
     let currentPage = page ?? 1;
     const perPage = 2;
     const totalPosts = await Post.find().countDocuments();
+
     const posts = await Post.find()
       .sort({ createdAt: -1 })
       .populate("creator")
@@ -301,6 +303,14 @@ const resolvers = {
     };
   },
 
+  /**
+   * Update a post
+   * @param {string} id - The id of the post to update
+   * @param {PostInputData} postInput - The data to update the post with
+   * @param {Request & { isAuth?: boolean; userId?: string }} req - The express request object
+   * @returns {Promise<Object>} - The post data with the id, title, content, imageUrl, createdAt, and updatedAt.
+   * @throws {ErrorType} - If the post is not found, if the user is not authenticated, or if the user is not authorized to update the post.
+   */
   updatePost: async (
     { id, postInput }: { id: string; postInput: PostInputData },
     req: Request & { isAuth?: boolean; userId?: string }
@@ -364,6 +374,40 @@ const resolvers = {
         _id: createdPostData.creator._id.toString(),
       },
     };
+  },
+
+  deletePost: async (
+    { id }: { id: string },
+    req: Request & { isAuth?: boolean; userId?: string }
+  ) => {
+    const errors: ErrorMsgType[] = [];
+    if (!req.isAuth) {
+      errors.push({ message: "Not authenticated" });
+    }
+
+    const post = await Post.findById(id).populate("creator");
+
+    if (!post || post === null) {
+      errors.push({ message: "Post not found!" });
+    }
+
+    if (post?.creator._id.toString() !== req.userId?.toString()) {
+      errors.push({ message: "Not authorized" });
+    }
+
+    if (errors.length > 0) {
+      const newError: ErrorType = new Error("Invalid input");
+      newError.data = errors;
+      newError.statusCode = 422;
+      throw newError;
+    }
+    clearImage(post!.imageUrl);
+    await Post.findByIdAndDelete(id);
+    const user = await User.findById(req.userId);
+
+    user!.posts.pull(id);
+    await user!.save();
+    return true;
   },
 };
 
