@@ -223,7 +223,10 @@ const resolvers = {
    * @returns an object with a posts array and a totalPosts number
    * @throws an error if the user is not authenticated
    */
-  posts: async (_args: any, req: Request & { isAuth?: boolean }) => {
+  posts: async (
+    { page }: { page: number },
+    req: Request & { isAuth?: boolean }
+  ) => {
     const errors: ErrorMsgType[] = [];
     console.log("isAuth", req.isAuth);
     if (!req.isAuth) {
@@ -236,12 +239,14 @@ const resolvers = {
       newError.statusCode = 422;
       throw newError;
     }
+    let currentPage = page ?? 1;
+    const perPage = 2;
     const totalPosts = await Post.find().countDocuments();
     const posts = await Post.find()
       .sort({ createdAt: -1 })
       .populate("creator")
-      .skip(0)
-      .limit(2);
+      .skip((currentPage - 1) * perPage)
+      .limit(perPage);
 
     return {
       posts: posts.map((post) => {

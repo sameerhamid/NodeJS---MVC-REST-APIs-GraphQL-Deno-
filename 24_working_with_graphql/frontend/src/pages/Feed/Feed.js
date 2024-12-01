@@ -52,10 +52,11 @@ class Feed extends Component {
       this.setState({ postPage: page });
     }
 
+    console.log(page);
     const graphqlQuery = {
       query: `
         {
-  posts {
+  posts(page:${page}) {
     posts {
       _id
       title
@@ -268,6 +269,7 @@ class Feed extends Component {
             );
             updatedPosts[postIndex] = post;
           } else {
+            updatedPosts.pop();
             updatedPosts.unshift(post);
           }
           return {
