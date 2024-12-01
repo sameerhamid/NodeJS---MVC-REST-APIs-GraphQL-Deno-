@@ -26,6 +26,7 @@ export interface UserType {
    * The date and time when the user was created
    */
   createdAt: string;
+  updatedAt: string;
   /**
    * The posts created by the user
    */
@@ -54,7 +55,7 @@ const userSchema = new Schema<UserType>(
     // Status of the user
     status: {
       type: String,
-      defaule: "I am new!", // Status is required
+      default: "I am new!", // Status is required
     },
     // Posts created by the user
     posts: [

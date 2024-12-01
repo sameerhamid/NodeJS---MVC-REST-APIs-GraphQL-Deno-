@@ -376,6 +376,13 @@ const resolvers = {
     };
   },
 
+  /**
+   * Deletes a post from the database.
+   * @param {{ id: string }} input - The id of the post to delete
+   * @param {Request & { isAuth?: boolean; userId?: string }} req - The express request object
+   * @returns {Promise<boolean>} - Returns true if the post was successfully deleted
+   * @throws {ErrorType} - Throws an error if the post or user is not found, or if an error occurs during the database query.
+   */
   deletePost: async (
     { id }: { id: string },
     req: Request & { isAuth?: boolean; userId?: string }
@@ -408,6 +415,83 @@ const resolvers = {
     user!.posts.pull(id);
     await user!.save();
     return true;
+  },
+
+  /**
+   * Gets the user associated with the current request.
+   * @param {any} args - Unused
+   * @param {Request & { isAuth?: boolean; userId?: string }} req - The express request object
+   * @returns {Promise<Object>} - The user data with the id, email, name, and status
+   * @throws {ErrorType} - If the user is not authenticated or if the user is not found
+   */
+  user: async (
+    ars: any,
+    req: Request & { isAuth?: boolean; userId?: string }
+  ) => {
+    const errors: ErrorMsgType[] = [];
+    if (!req.isAuth) {
+      return errors.push({ message: "Not authenticated" });
+    }
+
+    const user = await User.findById(req.userId);
+    if (!user) {
+      errors.push({ message: "User not found" });
+    }
+    if (errors.length > 0) {
+      const newError: ErrorType = new Error("Invalid input");
+      newError.data = errors;
+      newError.statusCode = 422;
+      throw newError;
+    }
+
+    const userObj = user!.toObject();
+    return {
+      ...userObj,
+      _id: userObj._id.toString(),
+      createdAt: userObj.createdAt.toString(),
+      updatedAt: userObj.updatedAt.toString(),
+    };
+  },
+
+  /**
+   * Updates the status of the user associated with the current request.
+   * @param {Object} args - Contains the status to be updated.
+   * @param {string} args.status - The status to be updated
+   * @param {Request & { isAuth?: boolean; userId?: string }} req - The express request object
+   * @returns {Promise<Object>} - The user data with the id, email, name, and status
+   * @throws {ErrorType} - If the user is not authenticated or if the user is not found
+   */
+  updateStatus: async (
+    { status }: { status: string },
+    req: Request & { isAuth?: boolean; userId?: string }
+  ) => {
+    console.log("calling>>>>", req.userId);
+    console.log(status);
+    const errors: ErrorMsgType[] = [];
+    if (!req.isAuth) {
+      return errors.push({ message: "Not authenticated" });
+    }
+
+    const user = await User.findById(req.userId);
+    if (!user) {
+      errors.push({ message: "User not found" });
+    }
+    if (errors.length > 0) {
+      const newError: ErrorType = new Error("Invalid input");
+      newError.data = errors;
+      newError.statusCode = 422;
+      throw newError;
+    }
+    user!.status = status;
+    await user!.save();
+
+    const userObj = user!.toObject();
+    return {
+      ...userObj,
+      _id: userObj._id.toString(),
+      createdAt: userObj.createdAt.toString(),
+      updatedAt: userObj.updatedAt.toString(),
+    };
   },
 };
 
