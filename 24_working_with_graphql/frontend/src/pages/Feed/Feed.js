@@ -340,6 +340,7 @@ class Feed extends Component {
           createdAt: resData.data[resDataField].createdAt,
         };
         this.setState((prevState) => {
+          let updatedTotalPost = prevState.totalPosts;
           const updatedPosts = [...prevState.posts];
           if (prevState.editPost) {
             const postIndex = prevState.posts.findIndex(
@@ -347,7 +348,11 @@ class Feed extends Component {
             );
             updatedPosts[postIndex] = post;
           } else {
-            updatedPosts.pop();
+            updatedTotalPost++;
+            if (prevState.posts.length >= 2) {
+              updatedPosts.pop();
+            }
+
             updatedPosts.unshift(post);
           }
           return {
@@ -355,6 +360,7 @@ class Feed extends Component {
             isEditing: false,
             editPost: null,
             editLoading: false,
+            totalPosts: updatedTotalPost,
           };
         });
       })
