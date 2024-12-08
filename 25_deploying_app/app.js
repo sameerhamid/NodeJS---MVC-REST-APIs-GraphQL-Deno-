@@ -1,6 +1,7 @@
 const path = require("path");
 
 const express = require("express");
+const https = require("https");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const session = require("express-session");
@@ -31,6 +32,8 @@ const store = new MonogoDBStore({
 
 const csrfProtection = csrf();
 
+const privatKey = fs.readFileSync("server.key");
+const certificate = fs.readFileSync("server.cert");
 // multer configuration
 
 // Configure multer storage
@@ -150,7 +153,15 @@ mongoose
       }
     });
 
-    app.listen(process.env.PORT || 3000);
+    https
+      .createServer(
+        {
+          key: privatKey,
+          cert: certificate,
+        },
+        app
+      )
+      .listen(process.env.PORT || 3000);
     console.log("Connected to MongoDB!");
     console.log("Server running on port 3000");
   })
