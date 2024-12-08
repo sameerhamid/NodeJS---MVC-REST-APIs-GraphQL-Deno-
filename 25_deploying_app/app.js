@@ -9,6 +9,7 @@ const MonogoDBStore = require("connect-mongodb-session")(session);
 const csrf = require("csurf");
 const flash = require("connect-flash");
 const multer = require("multer");
+const helmet = require("helmet");
 
 const errorController = require("./controllers/error");
 
@@ -16,7 +17,7 @@ const User = require("./models/user");
 
 // ?retryWrites=true&w=majority&appName=Cluster0
 const MONGODB_URI = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0.zfjhc.mongodb.net/${process.env.MONGO_DB}`;
-console.log(MONGODB_URI);
+
 const app = express();
 
 const store = new MonogoDBStore({
@@ -60,7 +61,7 @@ app.set("views", "views");
 const adminRoutes = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
 const authRoutes = require("./routes/auth");
-
+app.use(helmet());
 app.use(bodyParser.urlencoded({ extended: false }));
 // Initialize multer middleware
 app.use(
