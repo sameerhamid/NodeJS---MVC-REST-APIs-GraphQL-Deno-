@@ -15,8 +15,8 @@ const errorController = require("./controllers/error");
 const User = require("./models/user");
 
 // ?retryWrites=true&w=majority&appName=Cluster0
-const MONGODB_URI =
-  "mongodb+srv://codewithsamiir:NSXtwPvAKpa1RFra@cluster0.zfjhc.mongodb.net/shop-mongoose";
+const MONGODB_URI = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0.zfjhc.mongodb.net/${process.env.MONGO_DB}`;
+console.log(MONGODB_URI);
 const app = express();
 
 const store = new MonogoDBStore({
@@ -139,7 +139,7 @@ mongoose
       }
     });
 
-    app.listen(3000);
+    app.listen(process.env.PORT || 3000);
     console.log("Connected to MongoDB!");
     console.log("Server running on port 3000");
   })
